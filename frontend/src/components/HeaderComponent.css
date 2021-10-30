@@ -1,0 +1,12 @@
+* {
+    font-family: "Trebuchet MS";
+    font-weight: bold;
+}
+
+.navbar-custom{
+    background-color: #182D3A;
+}
+
+.navbar-brand-custom {
+    padding: 2rem;
+}
