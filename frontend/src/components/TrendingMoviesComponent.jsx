@@ -28,22 +28,22 @@ class TrendingMoviesComponent extends Component {
   handleResize() {
     if (window.innerWidth < 600) {
       this.setState(() => {
-        return {cardNum: 1}
+        return { cardNum: 1 };
       });
     }
-    if (window.innerWidth > 600 && window.innerWidth < 900) {
+    else if (window.innerWidth > 600 && window.innerWidth < 900) {
       this.setState(() => {
-        return {cardNum: 2}
+        return { cardNum: 2 };
       });
     }
-    if (window.innerWidth > 900 && window.innerWidth < 1200) {
+    else if (window.innerWidth > 900 && window.innerWidth < 1200) {
       this.setState(() => {
-        return {cardNum: 3}
+        return { cardNum: 3 };
       });
     }
-    if (window.innerWidth > 1200) {
+    else if (window.innerWidth > 1200) {
       this.setState(() => {
-        return {cardNum: 4}
+        return { cardNum: 4 };
       });
     }
   }
@@ -51,7 +51,7 @@ class TrendingMoviesComponent extends Component {
     let content = [];
     let index_begin = 0;
     let index_end = this.state.cardNum;
-    for(var i=0; i<(this.state.movies.length/this.state.cardNum); i++){
+    for (var i = 0; i < this.state.movies.length / this.state.cardNum; i++) {
       content.push(
         <div style={{ display: "flex", justifyContent: "center" }}>
           {this.state.movies.slice(index_begin, index_end).map((item, i) => {
@@ -77,28 +77,11 @@ class TrendingMoviesComponent extends Component {
   render() {
     return (
       <div>
+        {this.state.movies.length === 0 && (<div style={{padding: "3rem"}}><img src="./static/images/processing.gif" style={{width: "10rem"}}/></div>)}
+        {this.state.movies.length !== 0 && <div><h3 style={{fontWeight: "bold", fontSize: "1.2rem", color: "#182D3A"}}>Popular movies</h3></div>}
         {this.state.movies.length !== 0 && (
           <div>
-            <Carousel>
-              {this.renderSlides()}
-              {/*
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                {this.state.movies.slice(this.state.cardNum, this.state.cardNum*2).map((item, i) => {
-                  return (
-                    <MovieCardComponent
-                      key={i}
-                      title={item.title}
-                      poster_path={item.poster_path}
-                      rating={item.vote_average}
-                      genres={item.genres}
-                      year={item.year}
-                      overview={item.overview}
-                    />
-                  );
-                })}
-              </div>
-        */}
-            </Carousel>
+            <Carousel>{this.renderSlides()}</Carousel>
           </div>
         )}
       </div>

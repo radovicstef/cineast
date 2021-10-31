@@ -3,32 +3,56 @@ import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import "./HeaderComponent.css";
 
 class HeaderComponent extends Component {
-    render() {
-      return (
-        <div>
-          <nav className="navbar navbar-expand-lg navbar-light navbar-custom py-3">
-            <div className="container-fluid">
-              <div className="navbar-header">
-                <a
-                  href="/#"
-                  className="navbar-brand navbar-brand-custom"
-                  style={{ color: "white" }}
-                >
-                  CINEAST
-                </a>
-              </div>
-              <ul className="nav navbar-nav navbar-right ms-3">
-                <li className="nav-item">
-                  <a className="nav-link active" href="/#">
-                    <AccountCircleIcon style={{color: "white"}}/>
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </nav>
-        </div>
-      );
-    }
+  constructor(props){
+    super(props);
   }
-  
-  export default HeaderComponent;
+  render() {
+    return (
+      <div className="sticky-top">
+        <nav className="navbar navbar-expand-lg navbar-light navbar-custom">
+          <div className="navbar-header">
+            <a
+              href="/#"
+              className="navbar-brand navbar-brand-custom"
+              style={{ color: "white", marginLeft: "5%" }}
+            >
+              CINEAST
+            </a>
+          </div>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+            style={{marginRight: "1.5rem"}}
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
+          <div
+            id="navbarSupportedContent"
+            className="collapse navbar-collapse"
+            style={{ float: "right", justifyContent: "end", marginRight: "1.5rem" }}
+          >
+            <ul className="nav navbar-nav navbar-right mt-2 mt-lg-0 ms-3 mr-auto" style={{width: "100%", justifyContent: "end"}}>
+              <li className="nav-item" style={{padding: "0.5rem"}}>
+                <button className="btn btn-success" style={{ padding: "none", float: "right" }}>
+                  Sign up
+                </button>
+              </li>
+              <li className="nav-item" style={{padding: "0.5rem"}}>
+                <button className="btn btn-success" style={{ padding: "none", float: "right" }}>
+                  Login
+                </button>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </div>
+    );
+  }
+}
+
+export default HeaderComponent;

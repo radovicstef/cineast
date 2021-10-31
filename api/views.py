@@ -28,6 +28,7 @@ def TrendingMovies(request):
     resp.encoding = "utf-8"
     respJson = resp.json()
     results = respJson["results"]
+    genres_gathered = {}
     trending_movies = []
     for result in results:
         trending_movie = {}
@@ -41,9 +42,17 @@ def TrendingMovies(request):
         genre_names = []
         genre_ids = result["genre_ids"]
         for genre_id in genre_ids:
-            genre_resp = requests.get("https://api.themoviedb.org/3/genre/{}?api_key=aac569ce5b81de3e31bee34323e9745e".format(genre_id))
-            genre_respJson = genre_resp.json()
-            genre_names.append(genre_respJson["name"])
+            print(genres_gathered)
+            if(genre_id in genres_gathered):
+                print("here")
+                genre_names.append(genres_gathered[genre_id])
+            else:
+                genre_resp = requests.get("https://api.themoviedb.org/3/genre/{}?api_key=aac569ce5b81de3e31bee34323e9745e".format(genre_id))
+                genre_respJson = genre_resp.json()
+                id = genre_respJson["id"]
+                name = genre_respJson["name"]
+                genres_gathered[id] = name
+                genre_names.append(name)
         trending_movie["genres"] = genre_names
         trending_movies.append(trending_movie)
     return JsonResponse(trending_movies, safe=False)
