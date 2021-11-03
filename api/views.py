@@ -6,22 +6,15 @@ from pip._vendor.requests.models import Response
 from rest_framework.views import APIView
 from rest_framework import generics
 from .serializers import UserSerializer
-from .models import User, Movie
+from .models import User
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
-import json
 
 from api import serializers
 
 genres_gathered = {}
 
 # Create your views here.
-@api_view()
-def MoviesView(request):
-    resp = requests.get("https://api.themoviedb.org/3/movie/550?api_key=aac569ce5b81de3e31bee34323e9745e")
-    respJson = resp.json()
-    respJson["adult"] = True
-    return JsonResponse(respJson)
 
 @api_view()
 def TrendingMovies(request):
@@ -57,6 +50,9 @@ def TrendingMovies(request):
         trending_movies.append(trending_movie)
     return JsonResponse(trending_movies, safe=False)
 
-class UserView(generics.ListAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+@api_view()
+def Users(request):
+    users = User.objects.all()
+    serialized_users = UserSerializer(users, many=True)
+    print(serialized_users)
+    return JsonResponse(serialized_users.data, safe=False)
