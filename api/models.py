@@ -1,7 +1,11 @@
 from django.db import models
-from django.db.models.fields import TextField
+from django.db.models.fields import CharField, TextField
+from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
-class User(models.Model):
-    username = models.TextField(max_length=20, unique=True, primary_key=True)
-    password = models.TextField(max_length=50)
+class User(AbstractUser):
+    username = models.CharField(max_length=255, unique=True)
+    password = models.CharField(max_length=255)
+
+    REQUIRED_FIELDS = []
+    
