@@ -1,54 +1,106 @@
 import React, { Component } from "react";
 
 import "./LoginComponent.css";
+import cineastlogo from "../../static/images/cineastlogo.png";
+import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import VpnKeyIcon from "@material-ui/icons/VpnKey";
 
 class LoginComponent extends Component {
   render() {
     return (
-      <div className="gradient-custom">
-        <section className="vh-100" style={{marginBottom: "10rem"}}>
+      <div className="gradient-custom" style={{marginTop: "-1.5rem"}}>
+        <div
+          style={{
+            position: "fixed",
+            backgroundImage: `url("https://image.tmdb.org/t/p/original//d5NXSklXo0qyIYkgV94XAgMIckC.jpg")`,
+            backgroundPosition: "center",
+            backgroundSize: "cover",
+            backgroundRepeat: "no-repeat",
+            width: "100vw",
+            height: "100vh",
+            zIndex: "-99999",
+          }}
+        ></div>
+        <section className="vh-100">
           <div className="container py-5 h-100">
             <div className="row d-flex justify-content-center align-items-center h-100">
               <div className="col-12 col-md-8 col-lg-6 col-xl-5">
                 <div
-                  className="card bg-light"
-                  style={{ borderRadius: "1rem", color: "#182D3A" }}
+                  className="card"
+                  style={{
+                    borderRadius: "1rem",
+                    color: "#182D3A",
+                    backgroundColor: "rgba(255,255,255,0.5)",
+                  }}
                 >
                   <div className="card-body p-5 text-center">
-                    <div className="mb-md-5 mt-md-4 pb-5">
-                      <h2 className="fw-bold mb-2 text-uppercase">LOGIN</h2>
-                      <p className="mb-5">
-                        Please enter your username and password
+                    <div style={{ marginBottom: "2rem" }}>
+                      <p style={{ fontSize: "2rem", fontWeight: "bolder" }}>
+                        CINEAST
                       </p>
                     </div>
-                    <div className="form-outline form-white mb-4">
+                    <div
+                      className="input-group"
+                      style={{ marginBottom: "1rem" }}
+                    >
+                      <div className="input-group-prepend">
+                        <span
+                          className="input-group-text"
+                          id="inputGroupPrepend"
+                        >
+                          <AccountCircleIcon color="action" />
+                        </span>
+                      </div>
                       <input
-                        type="username"
-                        id="username"
-                        className="form-control form-control-lg"
+                        type="text"
+                        className="form-control"
+                        id="validationCustomUsername"
+                        placeholder="Username"
+                        aria-describedby="inputGroupPrepend"
+                        required
                       />
-                      <label className="form-label" htmlFor="username">
-                        Username
-                      </label>
+                      <div className="invalid-feedback">
+                        Please choose a username.
+                      </div>
                     </div>
-                    <div className="form-outline form-white mb-4">
+                    <div className="input-group">
+                      <div className="input-group-prepend">
+                        <span
+                          className="input-group-text"
+                          id="inputGroupPrepend"
+                        >
+                          <VpnKeyIcon color="action" />
+                        </span>
+                      </div>
                       <input
-                        type="password"
-                        id="password"
-                        className="form-control form-control-lg"
+                        type="text"
+                        className="form-control"
+                        id="validationCustomUsername"
+                        placeholder="Password"
+                        aria-describedby="inputGroupPrepend"
+                        required
                       />
-                      <label className="form-label" htmlFor="password">
-                        Password
-                      </label>
+                      <div className="invalid-feedback">
+                        Please choose a password.
+                      </div>
                     </div>
-                    <p className="small mb-5 pb-lg-2">
-                      <a href="#">Forgot password?</a>
-                    </p>
                   </div>
-                  <div>
+                  <div style={{ marginBottom: "2rem" }}>
+                    <button
+                      className="btn"
+                      style={{
+                        backgroundColor: "#182D3A",
+                        color: "white",
+                        width: "80%",
+                      }}
+                    >
+                      Login
+                    </button>
+                  </div>
+                  <div style={{marginBottom: "1rem"}}>
                     <p className="mb-0">
                       Don't have an account?{" "}
-                      <a href="#!" className="fw-bold">
+                      <a href="#!" id="signUp">
                         Sign Up
                       </a>
                     </p>

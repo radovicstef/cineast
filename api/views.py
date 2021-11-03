@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime as dtime
 import pip._vendor.requests as requests
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
@@ -27,15 +27,13 @@ def TrendingMoviesView(request):
         trending_movie["poster_path"] = result["poster_path"]
         trending_movie["vote_average"] = result["vote_average"]
         trending_movie["overview"] = result["overview"]
-        date = datetime.fromisoformat(result["release_date"])
+        date = dtime.fromisoformat(result["release_date"])
         trending_movie["year"] = date.year
         genre_ids = []
         genre_names = []
         genre_ids = result["genre_ids"]
         for genre_id in genre_ids:
-            print(genres_gathered)
             if(genre_id in genres_gathered):
-                print("here")
                 genre_names.append(genres_gathered[genre_id])
             else:
                 genre_resp = requests.get("https://api.themoviedb.org/3/genre/{}?api_key=aac569ce5b81de3e31bee34323e9745e".format(genre_id))
