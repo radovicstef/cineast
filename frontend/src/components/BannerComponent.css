@@ -1,0 +1,14 @@
+.header-title{
+    -webkit-animation: fadein 2s;
+    animation: fadein 2s;
+}
+
+.bannerImage{
+    -webkit-animation: fadeinImage 2s;
+    animation: fadeinImage 2s;
+}
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}

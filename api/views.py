@@ -13,6 +13,7 @@ import json
 
 from api import serializers
 
+genres_gathered = {}
 
 # Create your views here.
 @api_view()
@@ -28,7 +29,6 @@ def TrendingMovies(request):
     resp.encoding = "utf-8"
     respJson = resp.json()
     results = respJson["results"]
-    genres_gathered = {}
     trending_movies = []
     for result in results:
         trending_movie = {}

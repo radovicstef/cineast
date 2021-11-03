@@ -1,0 +1,29 @@
+.cineast {
+  font-size: 7rem;
+  font-weight: bolder;
+  position: relative;
+  text-transform: capitalize;
+  color: transparent;
+  -webkit-text-stroke: 3px #ffffff;
+}
+
+.cineast::before {
+  content: attr(data-fill-text);
+  position: absolute;
+  color: #ffffff;
+  width: 0;
+  -webkit-text-stroke: 0px transparent;
+  overflow: hidden;
+  transition: width 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+  -webkit-animation: animate 3s linear infinite;
+  animation: animate 3s linear infinite;
+}
+
+@keyframes animate {
+  0%, 10%, 100% {
+    width: 0;
+  }
+  70%, 90% {
+    width: 100%;
+  }
+}

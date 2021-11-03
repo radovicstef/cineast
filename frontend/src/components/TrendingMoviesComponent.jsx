@@ -17,6 +17,7 @@ class TrendingMoviesComponent extends Component {
     window.removeEventListener("resize", this.handleResize);
   }
   componentDidMount() {
+    console.log("here");
     fetch("http://localhost:8000/api/trending_movies")
       .then((reply) => reply.json())
       .then((reply) => {
@@ -53,7 +54,7 @@ class TrendingMoviesComponent extends Component {
     let index_end = this.state.cardNum;
     for (var i = 0; i < this.state.movies.length / this.state.cardNum; i++) {
       content.push(
-        <div style={{ display: "flex", justifyContent: "center" }}>
+        <div key={i} style={{ display: "flex", justifyContent: "center" }}>
           {this.state.movies.slice(index_begin, index_end).map((item, i) => {
             return (
               <MovieCardComponent
@@ -80,7 +81,7 @@ class TrendingMoviesComponent extends Component {
         {this.state.movies.length === 0 && (<div style={{padding: "3rem"}}><img src="./static/images/processing.gif" style={{width: "10rem"}}/></div>)}
         {this.state.movies.length !== 0 && <div><h3 style={{fontWeight: "bold", fontSize: "1.2rem", color: "#182D3A"}}>Popular movies</h3></div>}
         {this.state.movies.length !== 0 && (
-          <div>
+          <div style={{marginBottom: "3rem"}}>
             <Carousel>{this.renderSlides()}</Carousel>
           </div>
         )}
