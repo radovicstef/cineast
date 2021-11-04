@@ -1,12 +1,93 @@
 * {
-    font-family: "Trebuchet MS";
-    font-weight: bold;
+  font-family: "Trebuchet MS";
+  font-weight: bold;
 }
 
-.navbar-custom{
-    background-color: #182D3A;
+.navbar-custom {
+  background-color: #182d3a;
 }
 
 .navbar-brand-custom {
-    padding: 2rem;
+  padding: 2rem;
+}
+
+a,
+a:hover {
+  text-decoration: none;
+}
+
+.header-item {
+  color: white;
+}
+
+.header-item:hover {
+  color: white;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+}
+
+/* Dropdown Button */
+.dropbtn {
+  background-color: #04aa6d;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0rem;
+  top: 1.8rem;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  border-radius: 0.5rem;
+}
+
+.dropdown-button {
+  color: white;
+}
+
+.triangle {
+  position: absolute;
+  background-color: #f1f1f1;
+  height: 15px;
+  width: 15px;
+  color: #f1f1f1;
+  right: 5px;
+  top: -3px;
+  transform: rotate(45deg);
+  border-radius: 0.2rem;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  border-radius: 0.5rem;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {
+  background-color: #ddd;
+}
+.profile:hover + .triangle {
+  background-color: #ddd;
+  color: #ddd;
+}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {
+  display: block;
 }

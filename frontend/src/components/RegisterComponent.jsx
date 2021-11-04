@@ -1,56 +1,32 @@
 import React, { Component } from "react";
 
-import "./LoginComponent.css";
+import "./RegisterComponent.css";
 import cineastlogo from "../../static/images/cineastlogo.png";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import VpnKeyIcon from "@material-ui/icons/VpnKey";
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 
-class LoginComponent extends Component {
-  constructor(props) {
+class RegisterComponent extends Component {
+  constructor(props){
     super(props);
+    this.toggleVisibility = this.toggleVisibility.bind(this);
     this.state = {
-      username: "",
-      password: "",
-      hasLoginFailed: false,
-      showSuccessMessage: false,
-    };
-    this.submitLogin = this.submitLogin.bind(this);
-    this.handleChangeInput = this.handleChangeInput.bind(this);
+      passwordVisible: false
+    }
   }
-  submitLogin() {
-    const data = {
-      username: this.state.username,
-      password: this.state.password,
-    };
-    const request = new Request("http://localhost:8000/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-    fetch(request)
-      .then(
-        (response) => {
-          if(response.ok){
-            this.props.handleLoggedIn();
-            this.props.history.push("/welcome");
-          }
-        }
-      )
-  }
-  handleChangeInput(event) {
-    this.setState(() => {
-      return { [event.target.name]: event.target.value };
-    });
+  toggleVisibility() {
+    this.setState((prevValue) => {
+      return {passwordVisible: !prevValue.passwordVisible}
+    })
   }
   render() {
     return (
-      <div className="gradient-custom" style={{ marginTop: "-1.5rem" }}>
+      <div className="gradient-custom" style={{marginTop: "-1.5rem"}}>
         <div
           style={{
             position: "fixed",
-            backgroundImage: `url("https://image.tmdb.org/t/p/original//d5NXSklXo0qyIYkgV94XAgMIckC.jpg")`,
+            backgroundImage: `url("https://image.tmdb.org/t/p/original/qA2TyqPldTtoTVY3LKrNIG5g6bH.jpg")`,
             backgroundPosition: "center",
             backgroundSize: "cover",
             backgroundRepeat: "no-repeat",
@@ -94,10 +70,7 @@ class LoginComponent extends Component {
                         className="form-control"
                         id="validationCustomUsername"
                         placeholder="Username"
-                        name="username"
-                        value={this.state.username}
                         aria-describedby="inputGroupPrepend"
-                        onChange={this.handleChangeInput}
                         required
                       />
                       <div className="invalid-feedback">
@@ -109,19 +82,18 @@ class LoginComponent extends Component {
                         <span
                           className="input-group-text"
                           id="inputGroupPrepend"
+                          onClick={this.toggleVisibility}
                         >
-                          <VpnKeyIcon color="action" />
+                          {!this.state.passwordVisible && <VisibilityOffIcon color="action" />}
+                          {this.state.passwordVisible && <VisibilityIcon color="action" />}
                         </span>
                       </div>
                       <input
-                        type="text"
+                        type={this.state.passwordVisible ? "text" : "password"}
                         className="form-control"
                         id="validationCustomUsername"
-                        name="password"
                         placeholder="Password"
-                        value={this.state.password}
                         aria-describedby="inputGroupPrepend"
-                        onChange={this.handleChangeInput}
                         required
                       />
                       <div className="invalid-feedback">
@@ -131,7 +103,6 @@ class LoginComponent extends Component {
                   </div>
                   <div style={{ marginBottom: "2rem" }}>
                     <button
-                      onClick={this.submitLogin}
                       className="btn"
                       style={{
                         backgroundColor: "#182D3A",
@@ -139,14 +110,14 @@ class LoginComponent extends Component {
                         width: "80%",
                       }}
                     >
-                      Login
+                      Sign up
                     </button>
                   </div>
-                  <div style={{ marginBottom: "1rem" }}>
+                  <div style={{marginBottom: "1rem"}}>
                     <p className="mb-0">
-                      Don't have an account?{" "}
-                      <a href="#!" id="signUp">
-                        Sign Up
+                      Already have an account?{" "}
+                      <a href="#!" id="logIn">
+                        Login
                       </a>
                     </p>
                   </div>
@@ -160,4 +131,4 @@ class LoginComponent extends Component {
   }
 }
 
-export default LoginComponent;
+export default RegisterComponent;
