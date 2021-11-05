@@ -1,4 +1,6 @@
+import { Link } from "@material-ui/core";
 import React, { Component } from "react";
+import { withRouter } from "react-router";
 
 import GenreComponent from "./GenreComponent.jsx";
 import "./MovieCardComponent.css";
@@ -49,6 +51,7 @@ class MovieCardComponent extends Component {
               {this.shortOverview}
             </p>
             <button
+              onClick={() => {this.props.history.push(`/movie/${this.props.id}`)}}
               type="button"
               className="btn btn-secondary"
               style={{
@@ -92,4 +95,4 @@ class MovieCardComponent extends Component {
   }
 }
 
-export default MovieCardComponent;
+export default withRouter(MovieCardComponent);

@@ -9,8 +9,11 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 import jwt, datetime
+import pandas as pd
 
 genres_gathered = {}
+
+movies_df = pd.read_csv("movie_dataset.csv")
 
 # Create your views here.
 
@@ -27,6 +30,7 @@ def TrendingMoviesView(request):
         trending_movie["poster_path"] = result["poster_path"]
         trending_movie["vote_average"] = result["vote_average"]
         trending_movie["overview"] = result["overview"]
+        trending_movie["id"] = result["id"]
         date = dtime.fromisoformat(result["release_date"])
         trending_movie["year"] = date.year
         genre_ids = []

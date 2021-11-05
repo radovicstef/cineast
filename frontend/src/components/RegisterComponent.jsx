@@ -4,25 +4,54 @@ import "./RegisterComponent.css";
 import cineastlogo from "../../static/images/cineastlogo.png";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import VpnKeyIcon from "@material-ui/icons/VpnKey";
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+import VisibilityIcon from "@material-ui/icons/Visibility";
+import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 
 class RegisterComponent extends Component {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.toggleVisibility = this.toggleVisibility.bind(this);
     this.state = {
-      passwordVisible: false
-    }
+      username: "",
+      password: "",
+      passwordVisible: false,
+    };
+    this.submitRegister = this.submitRegister.bind(this);
+    this.handleChangeInput = this.handleChangeInput.bind(this);
+  }
+  handleChangeInput(event) {
+    this.setState(() => {
+      return { [event.target.name]: event.target.value };
+    });
   }
   toggleVisibility() {
     this.setState((prevValue) => {
-      return {passwordVisible: !prevValue.passwordVisible}
-    })
+      return { passwordVisible: !prevValue.passwordVisible };
+    });
+  }
+  submitRegister() {
+    const data = {
+      username: this.state.username,
+      password: this.state.password,
+    };
+    const request = new Request("http://localhost:8000/api/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    fetch(request).then((response) => {
+      if (response.ok) {
+        this.setState(() => {
+          return {username: "", password: ""}
+        });
+      }
+    });
   }
   render() {
     return (
-      <div className="gradient-custom" style={{marginTop: "-1.5rem"}}>
+      <div className="gradient-custom" style={{ marginTop: "-1.5rem" }}>
         <div
           style={{
             position: "fixed",
@@ -69,6 +98,9 @@ class RegisterComponent extends Component {
                         type="text"
                         className="form-control"
                         id="validationCustomUsername"
+                        name="username"
+                        value={this.state.username}
+                        onChange={this.handleChangeInput}
                         placeholder="Username"
                         aria-describedby="inputGroupPrepend"
                         required
@@ -84,8 +116,12 @@ class RegisterComponent extends Component {
                           id="inputGroupPrepend"
                           onClick={this.toggleVisibility}
                         >
-                          {!this.state.passwordVisible && <VisibilityOffIcon color="action" />}
-                          {this.state.passwordVisible && <VisibilityIcon color="action" />}
+                          {!this.state.passwordVisible && (
+                            <VisibilityOffIcon color="action" />
+                          )}
+                          {this.state.passwordVisible && (
+                            <VisibilityIcon color="action" />
+                          )}
                         </span>
                       </div>
                       <input
@@ -93,6 +129,9 @@ class RegisterComponent extends Component {
                         className="form-control"
                         id="validationCustomUsername"
                         placeholder="Password"
+                        name="password"
+                        value={this.state.password}
+                        onChange={this.handleChangeInput}
                         aria-describedby="inputGroupPrepend"
                         required
                       />
@@ -103,6 +142,7 @@ class RegisterComponent extends Component {
                   </div>
                   <div style={{ marginBottom: "2rem" }}>
                     <button
+                      onClick={this.submitRegister}
                       className="btn"
                       style={{
                         backgroundColor: "#182D3A",
@@ -113,10 +153,10 @@ class RegisterComponent extends Component {
                       Sign up
                     </button>
                   </div>
-                  <div style={{marginBottom: "1rem"}}>
+                  <div style={{ marginBottom: "1rem" }}>
                     <p className="mb-0">
                       Already have an account?{" "}
-                      <a href="#!" id="logIn">
+                      <a href="/login" id="logIn">
                         Login
                       </a>
                     </p>

@@ -65,6 +65,7 @@ class TrendingMoviesComponent extends Component {
                 genres={item.genres}
                 year={item.year}
                 overview={item.overview}
+                id={item.id}
               />
             );
           })}

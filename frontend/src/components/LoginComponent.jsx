@@ -114,7 +114,7 @@ class LoginComponent extends Component {
                         </span>
                       </div>
                       <input
-                        type="text"
+                        type="password"
                         className="form-control"
                         id="validationCustomUsername"
                         name="password"
@@ -145,7 +145,7 @@ class LoginComponent extends Component {
                   <div style={{ marginBottom: "1rem" }}>
                     <p className="mb-0">
                       Don't have an account?{" "}
-                      <a href="#!" id="signUp">
+                      <a href="/register" id="signUp">
                         Sign Up
                       </a>
                     </p>
