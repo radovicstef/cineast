@@ -1,22 +1,37 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import "./HeaderComponent.css";
 
 class HeaderComponent extends Component {
   constructor(props) {
     super(props);
+    this.onLogout = this.onLogout.bind(this);
+  }
+  onLogout() {
+    this.props.startLoading();
+    const request = new Request("http://localhost:8000/api/logout", {
+      method: "POST",
+    });
+    fetch(request).then((response) => {
+      if (response.ok) {
+        this.props.handleLogout();
+      }
+    });
   }
   render() {
     return (
       <div className="sticky-top">
         <nav className="navbar navbar-expand-lg navbar-light navbar-custom">
-          <div className="navbar-header" style={{paddingTop: "0.7rem", paddingBottom: "0.7rem"}}>
+          <div
+            className="navbar-header"
+            style={{ paddingTop: "0.7rem", paddingBottom: "0.7rem" }}
+          >
             <a
               href="/#"
               className="navbar-brand navbar-brand-custom"
-              style={{ color: "white", marginLeft: "5%", marginTop: "0.5rem"}}
+              style={{ color: "white", marginLeft: "5%", marginTop: "0.5rem" }}
             >
               CINEAST
             </a>
@@ -46,7 +61,7 @@ class HeaderComponent extends Component {
               className="nav navbar-nav navbar-right mt-2 mt-lg-0 ms-3 mr-auto"
               style={{ width: "100%", justifyContent: "end" }}
             >
-              {!this.props.loggedin && this.props.loggedin!==undefined && (
+              {!this.props.loggedin && this.props.loggedin !== undefined && (
                 <li className="nav-item" style={{ padding: "0.5rem" }}>
                   <Link to="/register">
                     <button
@@ -58,7 +73,7 @@ class HeaderComponent extends Component {
                   </Link>
                 </li>
               )}
-              {!this.props.loggedin && this.props.loggedin!==undefined &&  (
+              {!this.props.loggedin && this.props.loggedin !== undefined && (
                 <li className="nav-item" style={{ padding: "0.5rem" }}>
                   <Link to="/login">
                     <button
@@ -96,11 +111,14 @@ class HeaderComponent extends Component {
                   style={{ padding: "0.7rem", textAlign: "right" }}
                 >
                   <div className="dropdown">
-                    <AccountCircleIcon className="dropdown-button"/>
+                    <AccountCircleIcon className="dropdown-button" />
                     <div className="dropdown-content">
                       <Link className="profile">Profile</Link>
                       <span className="triangle">''</span>
-                      <Link>Logout<ExitToAppIcon style={{paddingLeft: "0.2rem"}}/></Link>
+                      <Link to="/" onClick={this.onLogout}>
+                        Logout
+                        <ExitToAppIcon style={{ paddingLeft: "0.2rem" }} />
+                      </Link>
                     </div>
                   </div>
                 </li>

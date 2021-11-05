@@ -23,6 +23,13 @@ class App extends Component {
     this.finishLoading = this.finishLoading.bind(this);
     this.handleLoggedIn = this.handleLoggedIn.bind(this);
     this.checkIfLoggedIn = this.checkIfLoggedIn.bind(this);
+    this.handleLogout = this.handleLogout.bind(this);
+    this.startLoading = this.startLoading.bind(this);
+  }
+  startLoading() {
+    this.setState(() => {
+      return { loading: true };
+    });
   }
   finishLoading() {
     this.setState(() => {
@@ -35,11 +42,16 @@ class App extends Component {
       return { loggedin: true };
     });
   }
+  handleLogout() {
+    this.setState(() => {
+      return { loggedin: false };
+    });
+  }
   async componentDidMount() {
     const isLoggedIn = await this.checkIfLoggedIn();
     this.setState(() => {
-      return {loggedin: isLoggedIn}
-    })
+      return { loggedin: isLoggedIn };
+    });
   }
   async checkIfLoggedIn() {
     return fetch("http://localhost:8000/api/user")
@@ -58,7 +70,11 @@ class App extends Component {
     return (
       <Router>
         <>
-          <HeaderComponent loggedin={this.state.loggedin} />
+          <HeaderComponent
+            handleLogout={this.handleLogout}
+            loggedin={this.state.loggedin}
+            startLoading = {this.startLoading}
+          />
           <div className="App">
             <Switch>
               <Route path="/" exact>
