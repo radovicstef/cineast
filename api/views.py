@@ -1,4 +1,5 @@
 from datetime import datetime as dtime
+from django.http.response import Http404
 import pip._vendor.requests as requests
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
@@ -13,13 +14,53 @@ import pandas as pd
 
 genres_gathered = {}
 
+API_KEY = "aac569ce5b81de3e31bee34323e9745e"
+
 movies_df = pd.read_csv("movie_dataset.csv")
 
 # Create your views here.
+class MovieDetails(APIView):
+    def get(self, request, movie_id):
+        resp = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={API_KEY}&append_to_response=credits")
+        resp.encoding = "utf-8"
+        movie = {}
+        if resp.ok:
+            respJson = resp.json()
+            movie["title"] = respJson["title"]
+            movie["overview"] = respJson["overview"]
+            movie["poster_path"] = respJson["poster_path"]
+            movie["rating"] = respJson["vote_average"]
+            movie["duration"] = respJson["runtime"]
+            movie["genres"] = []
+            for genre in respJson["genres"]:
+                movie["genres"].append(genre["name"])
+            movie["budget"] = respJson["budget"]
+            movie["revenue"] = respJson["revenue"]
+            movie["production_companies"] = respJson["production_companies"][:3]
+            movie["release_date"] = respJson["release_date"]
+            movie["directors"] = list(filter(lambda crew_member: crew_member['job'] == 'Director', respJson["credits"]["crew"]))[:3]
+            movie["writers"] = []
+            list_writers = list(filter(lambda crew_member: crew_member['job'] == 'Screenplay', respJson["credits"]["crew"]))[:3]
+            if len(list_writers)!=0:
+                if(len(movie["writers"])!=0):
+                    movie["writers"].append(list_writers)
+                else:
+                    movie["writers"] = list_writers
+            list_writers = list(filter(lambda crew_member: crew_member['job'] == 'Writer', respJson["credits"]["crew"]))[:3]
+            if len(list_writers)!=0:
+                if(len(movie["writers"])!=0):
+                    movie["writers"].append(list_writers)
+                else:
+                    movie["writers"] = list_writers
+            movie["cast"] = respJson["credits"]["cast"][:5]
+            movie["background_image"] = respJson["backdrop_path"]
+            return JsonResponse(movie, safe=False)
+        else:
+            raise Http404
 
 @api_view()
 def TrendingMoviesView(request):
-    resp = requests.get("https://api.themoviedb.org/3/trending/movie/week?api_key=aac569ce5b81de3e31bee34323e9745e")
+    resp = requests.get(f"https://api.themoviedb.org/3/trending/movie/week?api_key={API_KEY}")
     resp.encoding = "utf-8"
     respJson = resp.json()
     results = respJson["results"]

@@ -60,7 +60,7 @@ class BannerComponent extends Component {
       style={{
         width: "100%",
         marginTop: `${this.state.topmargin}`,
-        marginBottom: "1rem",
+        marginBottom: `${this.props.loading ? "0" : "1rem"}`,
       }}
     />;
   }

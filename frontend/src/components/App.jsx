@@ -12,7 +12,7 @@ import RegisterComponent from "./RegisterComponent.jsx";
 import AuthenticatedRoute from "./AuthenticatedRoute.jsx";
 import WelcomeComponent from "./WelcomeComponent.jsx";
 import AuthenticationService from "./AuthenticationService.js";
-import MovieDetails from "./MovieDetails.jsx";
+import MovieDetails from "./MovieDetails/MovieDetails.jsx";
 
 class App extends Component {
   constructor(props) {
@@ -38,7 +38,6 @@ class App extends Component {
     });
   }
   handleLoggedIn() {
-    console.log("handleLoggedIn");
     this.setState(() => {
       return { loggedin: true };
     });
@@ -68,7 +67,6 @@ class App extends Component {
       });
   }
   render() {
-    console.log(this.props);
     return (
       <Router>
         <>
@@ -88,6 +86,7 @@ class App extends Component {
                 />
                 {!this.state.loading && <TrendingMoviesComponent/>}
               </Route>
+              <Route path="/movie/:id" component={MovieDetails}/>
               <Route
                 path="/login"
                 render={(props) => (
@@ -104,9 +103,6 @@ class App extends Component {
                 path="/welcome"
                 component={WelcomeComponent}
               />
-              <Route name="movie" path="/:id">
-                <MovieDetails/>
-              </Route>
             </Switch>
           </div>
           <FooterComponent />

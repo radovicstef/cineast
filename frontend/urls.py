@@ -6,5 +6,6 @@ urlpatterns = [
     path('about', index),
     path('login', index),
     path('register', index),
-    path('welcome', index)
+    path('welcome', index),
+    path('movie/<int:id>', index)
 ]
