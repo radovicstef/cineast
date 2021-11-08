@@ -54,17 +54,7 @@ class App extends Component {
     });
   }
   async checkIfLoggedIn() {
-    return fetch("http://localhost:8000/api/user")
-      .then((response) => {
-        if (!response.ok) {
-          return false;
-        } else {
-          return true;
-        }
-      })
-      .catch(() => {
-        return false;
-      });
+    return AuthenticationService.isUserLoggedIn();
   }
   render() {
     return (

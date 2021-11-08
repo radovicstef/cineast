@@ -11,7 +11,7 @@ class CastComponent extends Component {
   }
   render() {
     return (
-      <div style={{ width: "100%" }}>
+      <div style={{ width: "100%", textAlign: "center", margin: "0.5rem" }}>
         <div>
           {this.props.profile_path !== null && (
             <img
@@ -53,7 +53,16 @@ class CastComponent extends Component {
           )}
           <br></br>
           <span style={{ fontWeight: "lighter", fontSize: "0.9rem" }}>
-            {this.props.name}
+            {this.props.type === "actor" && this.props.name}
+            {this.props.type !== "actor" &&
+              this.props.name.split(" ").map((name) => {
+                return (
+                  <span>
+                    {name}
+                    <br></br>
+                  </span>
+                );
+              })}
           </span>
         </div>
       </div>

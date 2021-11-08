@@ -7,6 +7,9 @@ import StarIcon from "@material-ui/icons/Star";
 import GenreComponent from "../GenreComponent.jsx";
 import TheatersIcon from "@material-ui/icons/Theaters";
 import CastComponent from "./CastComponent.jsx";
+import AuthenticationService from "../AuthenticationService";
+import FavoriteIcon from "@material-ui/icons/Favorite";
+import ChartBudget from "./ChartBudget.jsx";
 
 class MovieDetails extends Component {
   constructor(props) {
@@ -14,8 +17,13 @@ class MovieDetails extends Component {
     this.IMG_PREFIX = "https://image.tmdb.org/t/p/original/";
     this.state = {
       details: undefined,
+      loggedin: false,
+      favorite: false,
     };
     this.getMovieDetails = this.getMovieDetails.bind(this);
+    this.checkIfLoggedIn = this.checkIfLoggedIn.bind(this);
+    this.addToFavorites = this.addToFavorites.bind(this);
+    this.removeFromFavorites = this.removeFromFavorites.bind(this);
   }
   getMovieDetails() {
     fetch(`http://localhost:8000/api/movie/${this.props.match.params.id}`)
@@ -26,8 +34,25 @@ class MovieDetails extends Component {
         });
       });
   }
-  componentDidMount() {
+  async componentDidMount() {
     this.getMovieDetails();
+    const isLoggedIn = await this.checkIfLoggedIn();
+    this.setState(() => {
+      return { loggedin: isLoggedIn };
+    });
+  }
+  checkIfLoggedIn() {
+    return AuthenticationService.isUserLoggedIn();
+  }
+  addToFavorites() {
+    this.setState(() => {
+      return { favorite: true };
+    });
+  }
+  removeFromFavorites() {
+    this.setState(() => {
+      return { favorite: false };
+    });
   }
   render() {
     return (
@@ -52,7 +77,7 @@ class MovieDetails extends Component {
           ></div>
         )}
 
-        <section style={{minHeight: "100%"}}>
+        <section style={{ minHeight: "100%" }}>
           {this.state.details !== undefined && (
             <Box sx={{ flexGrow: 1 }}>
               <Grid container>
@@ -66,6 +91,35 @@ class MovieDetails extends Component {
                       this.IMG_PREFIX + this.state.details.poster_path
                     }
                   />
+                  {this.state.loggedin && (
+                    <div style={{ marginTop: "1rem" }}>
+                      {!this.state.favorite && (
+                        <button
+                          className="favorite-button"
+                          onClick={this.addToFavorites}
+                          data-toggle="tooltip"
+                          title="Add to favorites"
+                        >
+                          <FavoriteIcon className="favorite" />
+                        </button>
+                      )}
+                      {this.state.favorite && (
+                        <button
+                          className="favorite-button"
+                          onClick={this.removeFromFavorites}
+                          data-toggle="tooltip"
+                          title="Remove from favorites"
+                        >
+                          <FavoriteIcon
+                            style={{
+                              color: "rgba(224, 36, 1)",
+                              transform: "scale(1.2)",
+                            }}
+                          />
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </Grid>
                 <Grid item xs={8}>
                   <div
@@ -155,7 +209,7 @@ class MovieDetails extends Component {
                       padding: "1rem",
                       borderRadius: "1rem",
                       position: "relative",
-                      width: "90%"
+                      width: "90%",
                     }}
                   >
                     <span
@@ -177,26 +231,56 @@ class MovieDetails extends Component {
                       display: "flex",
                       float: "left",
                       textAlign: "center",
+                      alignItems: "center",
                       marginLeft: "2rem",
                       marginTop: "1rem",
                       color: "white",
                       padding: "1rem",
                       borderRadius: "1rem",
                       backgroundColor: "rgba(24, 45, 58, 0.5)",
-                      width: "40%"
+                      width: "43%",
+                      justifyContent: "space-between",
+                      padding: "2rem",
                     }}
                   >
-                    <p style={{fontSize: "1.5rem", fontWeight: "bold"}}>DIRECTOR</p>
-                    {this.state.details.directors.slice(0,2).map((member, i) => {
-                      return (
-                        <CastComponent
-                          key={i}
-                          profile_path={member.profile_path}
-                          name={member.name}
-                          type="director"
-                        />
-                      );
-                    })}
+                    <div>
+                      <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
+                        DIRECTOR
+                      </p>
+                      <span style={{ display: "flex", textAlign: "left" }}>
+                        {this.state.details.directors
+                          .slice(0, 2)
+                          .map((member, i) => {
+                            return (
+                              <CastComponent
+                                key={i}
+                                profile_path={member.profile_path}
+                                name={member.name}
+                                type="director"
+                              />
+                            );
+                          })}
+                      </span>
+                    </div>
+                    <div>
+                      <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
+                        WRITER
+                      </p>
+                      <span style={{ display: "flex", textAlign: "right" }}>
+                        {this.state.details.writers
+                          .slice(0, 2)
+                          .map((member, i) => {
+                            return (
+                              <CastComponent
+                                key={i}
+                                profile_path={member.profile_path}
+                                name={member.name}
+                                type="writer"
+                              />
+                            );
+                          })}
+                      </span>
+                    </div>
                   </div>
                   <div
                     style={{
@@ -209,21 +293,48 @@ class MovieDetails extends Component {
                       padding: "1rem",
                       borderRadius: "1rem",
                       backgroundColor: "rgba(24, 45, 58, 0.5)",
-                      marginLeft: "10%",
-                      width: "40%"
+                      marginLeft: "4%",
+                      width: "43%",
+                      height: "14.7rem",
                     }}
                   >
-                    <p style={{fontSize: "1.5rem", fontWeight: "bold"}}>WRITER</p>
-                    {this.state.details.writers.slice(0,2).map((member, i) => {
-                      return (
-                        <CastComponent
-                          key={i}
-                          profile_path={member.profile_path}
-                          name={member.name}
-                          type="writer"
-                        />
-                      );
-                    })}
+                    <div
+                      style={{
+                        width: "100%",
+                        textAlign: "center",
+                        margin: "auto 0",
+                      }}
+                    >
+                      {this.state.details.budget !== 0 &&
+                        this.state.details.revenue !== 0 && (
+                          <ChartBudget
+                            budget={this.state.details.budget}
+                            revenue={this.state.details.revenue}
+                          />
+                        )}
+                      {(this.state.details.budget === 0 ||
+                        this.state.details.revenue === 0) && (
+                        <div style={{textAlign: "center"}}>
+                          <p style={{ fontSize: "1.5rem", fontWeight: "bold"}}>
+                            PRODUCTION
+                          </p>
+                          <div style={{display: "flex", justifyContent: "space-between"}}>
+                            {this.state.details.production_companies
+                              .slice(0, 2)
+                              .map((company, i) => {
+                                return (
+                                  <CastComponent
+                                    key={i}
+                                    name={company.name}
+                                    profile_path={company.logo_path}
+                                    type="actor"
+                                  />
+                                );
+                              })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div
                     style={{
@@ -232,14 +343,17 @@ class MovieDetails extends Component {
                       textAlign: "center",
                       marginLeft: "2rem",
                       marginTop: "1rem",
+                      marginBottom: "3rem",
                       color: "white",
                       padding: "1rem",
                       borderRadius: "1rem",
                       backgroundColor: "rgba(24, 45, 58, 0.5)",
-                      width: "90%"
+                      width: "90%",
                     }}
                   >
-                    <p style={{fontSize: "1.5rem", fontWeight: "bold"}}>CAST</p>
+                    <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
+                      CAST
+                    </p>
                     {this.state.details.cast.map((member, i) => {
                       return (
                         <CastComponent
