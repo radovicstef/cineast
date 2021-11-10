@@ -19,11 +19,16 @@ class MovieDetails extends Component {
       details: undefined,
       loggedin: false,
       favorite: false,
+      productionWidth: "43%",
+      compact: false,
+      numActors: 5
     };
     this.getMovieDetails = this.getMovieDetails.bind(this);
     this.checkIfLoggedIn = this.checkIfLoggedIn.bind(this);
     this.addToFavorites = this.addToFavorites.bind(this);
     this.removeFromFavorites = this.removeFromFavorites.bind(this);
+    this.handleResizeMovieDetails = this.handleResizeMovieDetails.bind(this);
+    window.addEventListener("resize", this.handleResizeMovieDetails);
   }
   getMovieDetails() {
     fetch(`http://localhost:8000/api/movie/${this.props.match.params.id}`)
@@ -40,11 +45,25 @@ class MovieDetails extends Component {
     this.setState(() => {
       return { loggedin: isLoggedIn };
     });
+    this.handleResizeMovieDetails();
   }
   checkIfLoggedIn() {
     return AuthenticationService.isUserLoggedIn();
   }
   addToFavorites() {
+    const data = {movie_id: this.props.match.params.id}
+    const request = new Request("http://localhost:8000/api/add_favorite", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    fetch(request).then((response) => {
+      if (response.ok) {
+        console.log("Added favorite movie")
+      }
+    });
     this.setState(() => {
       return { favorite: true };
     });
@@ -54,7 +73,32 @@ class MovieDetails extends Component {
       return { favorite: false };
     });
   }
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.handleResize);
+  }
+  handleResizeMovieDetails() {
+    if (window.innerWidth >= 1100) {
+      this.setState(() => {
+        return { productionWidth: "43%", compact: false, numActors:5 };
+      });
+    } else if (window.innerWidth < 1100 && window.innerWidth > 810) {
+      this.setState(() => {
+        return { productionWidth: "90%", compact: false, numActors:5};
+      });
+    } else if (window.innerWidth < 810 && window.innerWidth > 540) {
+      this.setState(() => {
+        return { productionWidth: "90%", compact: true, numActors:5};
+      });
+    }
+    else if (window.innerWidth < 540) {
+      this.setState(() => {
+        return { productionWidth: "90%", numActors: 4 };
+      });
+    }
+  }
   render() {
+    console.log("actorRow: " + this.state.numActors);
+
     return (
       <div
         className="movie-details-gradient-custom"
@@ -81,7 +125,7 @@ class MovieDetails extends Component {
           {this.state.details !== undefined && (
             <Box sx={{ flexGrow: 1 }}>
               <Grid container>
-                <Grid
+                {!this.state.compact && <Grid
                   item
                   xs={2}
                   style={{ marginTop: "3rem", marginLeft: "3rem" }}
@@ -120,15 +164,16 @@ class MovieDetails extends Component {
                       )}
                     </div>
                   )}
-                </Grid>
-                <Grid item xs={8}>
+                </Grid>}
+                <Grid item xs={this.state.compact ? 12 : 8}>
                   <div
                     style={{
-                      width: "100%",
+                      width: "90%",
                       display: "flex",
                       float: "left",
                       marginTop: "3rem",
                       marginLeft: "2rem",
+                      textAlign: "left",
                     }}
                   >
                     <span style={{ fontSize: "3rem", color: "white" }}>
@@ -141,7 +186,7 @@ class MovieDetails extends Component {
                       display: "flex",
                       float: "left",
                       marginLeft: "2rem",
-                      width: "100%",
+                      width: "90%",
                     }}
                   >
                     <span style={{ color: "white" }}>
@@ -166,7 +211,7 @@ class MovieDetails extends Component {
                       float: "left",
                       marginLeft: "2rem",
                       marginTop: "1rem",
-                      width: "100%",
+                      width: "90%",
                     }}
                   >
                     <StarIcon style={{ fontSize: "2rem", color: "#F4D03F" }} />
@@ -202,7 +247,8 @@ class MovieDetails extends Component {
                       display: "flex",
                       float: "left",
                       textAlign: "left",
-                      marginLeft: "2rem",
+                      marginLeft: `${this.state.compact ? "1rem" : "2rem"}`,
+                      marginRight: `${this.state.compact ? "1rem" : "0rem"}`,
                       marginTop: "1rem",
                       color: "white",
                       backgroundColor: "rgba(24, 45, 58, 0.5)",
@@ -232,13 +278,13 @@ class MovieDetails extends Component {
                       float: "left",
                       textAlign: "center",
                       alignItems: "center",
-                      marginLeft: "2rem",
+                      marginLeft: `${this.state.compact ? "1rem" : "2rem"}`,
+                      marginRight: `${this.state.compact ? "1rem" : "0rem"}`,
                       marginTop: "1rem",
                       color: "white",
-                      padding: "1rem",
                       borderRadius: "1rem",
                       backgroundColor: "rgba(24, 45, 58, 0.5)",
-                      width: "43%",
+                      width: `${this.state.productionWidth}`,
                       justifyContent: "space-between",
                       padding: "2rem",
                     }}
@@ -287,14 +333,14 @@ class MovieDetails extends Component {
                       display: "flex",
                       float: "left",
                       textAlign: "center",
-                      marginLeft: "2rem",
+                      marginLeft: `${this.state.compact ? "1rem" : "2rem"}`,
+                      marginRight: `${this.state.compact ? "1rem" : "0rem"}`,
                       marginTop: "1rem",
                       color: "white",
-                      padding: "1rem",
+                      padding: "2rem",
                       borderRadius: "1rem",
                       backgroundColor: "rgba(24, 45, 58, 0.5)",
-                      marginLeft: "4%",
-                      width: "43%",
+                      width: `${this.state.productionWidth}`,
                       height: "14.7rem",
                     }}
                   >
@@ -314,11 +360,16 @@ class MovieDetails extends Component {
                         )}
                       {(this.state.details.budget === 0 ||
                         this.state.details.revenue === 0) && (
-                        <div style={{textAlign: "center"}}>
-                          <p style={{ fontSize: "1.5rem", fontWeight: "bold"}}>
+                        <div style={{ textAlign: "center" }}>
+                          <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
                             PRODUCTION
                           </p>
-                          <div style={{display: "flex", justifyContent: "space-between"}}>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                            }}
+                          >
                             {this.state.details.production_companies
                               .slice(0, 2)
                               .map((company, i) => {
@@ -327,7 +378,7 @@ class MovieDetails extends Component {
                                     key={i}
                                     name={company.name}
                                     profile_path={company.logo_path}
-                                    type="actor"
+                                    type="director"
                                   />
                                 );
                               })}
@@ -341,7 +392,8 @@ class MovieDetails extends Component {
                       display: "flex",
                       float: "left",
                       textAlign: "center",
-                      marginLeft: "2rem",
+                      marginLeft: `${this.state.compact ? "1rem" : "2rem"}`,
+                      marginRight: `${this.state.compact ? "1rem" : "0rem"}`,
                       marginTop: "1rem",
                       marginBottom: "3rem",
                       color: "white",
@@ -354,16 +406,26 @@ class MovieDetails extends Component {
                     <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
                       CAST
                     </p>
-                    {this.state.details.cast.map((member, i) => {
-                      return (
-                        <CastComponent
-                          key={i}
-                          profile_path={member.profile_path}
-                          name={member.name}
-                          type="actor"
-                        />
-                      );
-                    })}
+                    <span
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        float: "left",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {this.state.details.cast
+                        .slice(0, this.state.numActors).map((member, i) => {
+                          return (
+                            <CastComponent
+                              key={i}
+                              profile_path={member.profile_path}
+                              name={member.name}
+                              type="actor"
+                            />
+                          );
+                        })}
+                    </span>
                   </div>
                 </Grid>
               </Grid>

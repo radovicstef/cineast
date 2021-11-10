@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import User, FavoriteMovies
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,3 +16,8 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(password) #set_pasword creates hashed password
         instance.save()
         return instance
+
+class FavoriteMoviesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FavoriteMovies
+        fields = ('username', 'movie_id')

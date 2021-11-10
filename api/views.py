@@ -4,8 +4,8 @@ import pip._vendor.requests as requests
 from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
-from .serializers import UserSerializer
-from .models import User
+from .serializers import FavoriteMoviesSerializer, UserSerializer
+from .models import FavoriteMovies, User
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
@@ -120,6 +120,26 @@ class LoginView(APIView):
         }
         return response
 
+class AddFavorite(APIView):
+    def post(self, request):
+        token = request.COOKIES.get("jwt")
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+        try:
+            payload = jwt.decode(token, "secret", algorithms=["HS256"])
+        except:
+            raise AuthenticationFailed("Unauthenticated!")
+        user = User.objects.filter(username=payload["username"]).first()
+        movie_id = request.data["movie_id"]
+        new_favorite = FavoriteMovies()
+        new_favorite.username = user.username
+        new_favorite.movie_id = movie_id
+        new_favorite.save()
+        response = Response()
+        response.data = {
+            "message": "successful"
+        }
+        return response
 
 class UserView(APIView):
     def get(self, request):

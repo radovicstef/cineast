@@ -1,3 +1,4 @@
+from enum import unique
 from django.db import models
 from django.db.models.fields import CharField, TextField
 from django.contrib.auth.models import AbstractUser
@@ -8,4 +9,13 @@ class User(AbstractUser):
     password = models.CharField(max_length=255)
 
     REQUIRED_FIELDS = []
+
+class FavoriteMovies(models.Model):
+    username = models.CharField(max_length=255)
+    movie_id = models.IntegerField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["username", "movie_id"], name='Unique favorite movie for user'),
+        ]
     
