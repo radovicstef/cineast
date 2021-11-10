@@ -1,9 +1,7 @@
 import React, { Component } from "react";
 
 import "./RegisterComponent.css";
-import cineastlogo from "../../static/images/cineastlogo.png";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
-import VpnKeyIcon from "@material-ui/icons/VpnKey";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 

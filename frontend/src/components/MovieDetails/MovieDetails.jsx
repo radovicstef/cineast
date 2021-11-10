@@ -4,10 +4,10 @@ import React, { Component } from "react";
 import "./MovieDetails.css";
 import MovieDetailsPoster from "./MovieDetailsPoster.jsx";
 import StarIcon from "@material-ui/icons/Star";
-import GenreComponent from "../GenreComponent.jsx";
+import GenreComponent from "../MovieCard/GenreComponent.jsx";
 import TheatersIcon from "@material-ui/icons/Theaters";
 import CastComponent from "./CastComponent.jsx";
-import AuthenticationService from "../AuthenticationService";
+import AuthenticationService from "../Authentication/AuthenticationService";
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import ChartBudget from "./ChartBudget.jsx";
 

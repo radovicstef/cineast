@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Redirect, Route } from "react-router";
 import AuthenticationService from "./AuthenticationService";
-import ProcessingComponent from "./ProcessingComponent.jsx";
+import ProcessingComponent from "../ProcessingComponent/ProcessingComponent.jsx";
 
 class AuthenticatedRoute extends Component {
   constructor(props) {
