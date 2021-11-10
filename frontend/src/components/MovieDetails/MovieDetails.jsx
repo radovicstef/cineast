@@ -21,13 +21,14 @@ class MovieDetails extends Component {
       favorite: false,
       productionWidth: "43%",
       compact: false,
-      numActors: 5
+      numActors: 5,
     };
     this.getMovieDetails = this.getMovieDetails.bind(this);
     this.checkIfLoggedIn = this.checkIfLoggedIn.bind(this);
     this.addToFavorites = this.addToFavorites.bind(this);
-    this.removeFromFavorites = this.removeFromFavorites.bind(this);
+    this.addToFavorites = this.addToFavorites.bind(this);
     this.handleResizeMovieDetails = this.handleResizeMovieDetails.bind(this);
+    this.removeFromFavorites = this.removeFromFavorites.bind(this);
     window.addEventListener("resize", this.handleResizeMovieDetails);
   }
   getMovieDetails() {
@@ -42,8 +43,15 @@ class MovieDetails extends Component {
   async componentDidMount() {
     this.getMovieDetails();
     const isLoggedIn = await this.checkIfLoggedIn();
+    let isMovieLiked = await AuthenticationService.isMovieLiked(
+      this.props.match.params.id
+    );
+    isMovieLiked = isMovieLiked === "true";
+    console.log(
+      "isMovieLiked " + isMovieLiked + ", type=" + typeof isMovieLiked
+    );
     this.setState(() => {
-      return { loggedin: isLoggedIn };
+      return { loggedin: isLoggedIn, favorite: isMovieLiked };
     });
     this.handleResizeMovieDetails();
   }
@@ -51,7 +59,7 @@ class MovieDetails extends Component {
     return AuthenticationService.isUserLoggedIn();
   }
   addToFavorites() {
-    const data = {movie_id: this.props.match.params.id}
+    const data = { movie_id: this.props.match.params.id };
     const request = new Request("http://localhost:8000/api/add_favorite", {
       method: "POST",
       headers: {
@@ -61,7 +69,7 @@ class MovieDetails extends Component {
     });
     fetch(request).then((response) => {
       if (response.ok) {
-        console.log("Added favorite movie")
+        console.log("Added favorite movie");
       }
     });
     this.setState(() => {
@@ -69,8 +77,15 @@ class MovieDetails extends Component {
     });
   }
   removeFromFavorites() {
-    this.setState(() => {
-      return { favorite: false };
+    fetch(
+      `http://localhost:8000/api/remove_favorite/${this.props.match.params.id}/`
+    ).then((response) => {
+      if (response.ok) {
+        console.log("Removed favorite movie");
+        this.setState(() => {
+          return { favorite: false };
+        });
+      }
     });
   }
   componentWillUnmount() {
@@ -79,18 +94,17 @@ class MovieDetails extends Component {
   handleResizeMovieDetails() {
     if (window.innerWidth >= 1100) {
       this.setState(() => {
-        return { productionWidth: "43%", compact: false, numActors:5 };
+        return { productionWidth: "43%", compact: false, numActors: 5 };
       });
     } else if (window.innerWidth < 1100 && window.innerWidth > 810) {
       this.setState(() => {
-        return { productionWidth: "90%", compact: false, numActors:5};
+        return { productionWidth: "90%", compact: false, numActors: 5 };
       });
     } else if (window.innerWidth < 810 && window.innerWidth > 540) {
       this.setState(() => {
-        return { productionWidth: "90%", compact: true, numActors:5};
+        return { productionWidth: "90%", compact: true, numActors: 5 };
       });
-    }
-    else if (window.innerWidth < 540) {
+    } else if (window.innerWidth < 540) {
       this.setState(() => {
         return { productionWidth: "90%", numActors: 4 };
       });
@@ -125,46 +139,48 @@ class MovieDetails extends Component {
           {this.state.details !== undefined && (
             <Box sx={{ flexGrow: 1 }}>
               <Grid container>
-                {!this.state.compact && <Grid
-                  item
-                  xs={2}
-                  style={{ marginTop: "3rem", marginLeft: "3rem" }}
-                >
-                  <MovieDetailsPoster
-                    poster_path={
-                      this.IMG_PREFIX + this.state.details.poster_path
-                    }
-                  />
-                  {this.state.loggedin && (
-                    <div style={{ marginTop: "1rem" }}>
-                      {!this.state.favorite && (
-                        <button
-                          className="favorite-button"
-                          onClick={this.addToFavorites}
-                          data-toggle="tooltip"
-                          title="Add to favorites"
-                        >
-                          <FavoriteIcon className="favorite" />
-                        </button>
-                      )}
-                      {this.state.favorite && (
-                        <button
-                          className="favorite-button"
-                          onClick={this.removeFromFavorites}
-                          data-toggle="tooltip"
-                          title="Remove from favorites"
-                        >
-                          <FavoriteIcon
-                            style={{
-                              color: "rgba(224, 36, 1)",
-                              transform: "scale(1.2)",
-                            }}
-                          />
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </Grid>}
+                {!this.state.compact && (
+                  <Grid
+                    item
+                    xs={2}
+                    style={{ marginTop: "3rem", marginLeft: "3rem" }}
+                  >
+                    <MovieDetailsPoster
+                      poster_path={
+                        this.IMG_PREFIX + this.state.details.poster_path
+                      }
+                    />
+                    {this.state.loggedin && (
+                      <div style={{ marginTop: "1rem" }}>
+                        {!this.state.favorite && (
+                          <button
+                            className="favorite-button"
+                            onClick={this.addToFavorites}
+                            data-toggle="tooltip"
+                            title="Add to favorites"
+                          >
+                            <FavoriteIcon className="favorite" />
+                          </button>
+                        )}
+                        {this.state.favorite && (
+                          <button
+                            className="favorite-button"
+                            onClick={this.removeFromFavorites}
+                            data-toggle="tooltip"
+                            title="Remove from favorites"
+                          >
+                            <FavoriteIcon
+                              style={{
+                                color: "rgba(224, 36, 1)",
+                                transform: "scale(1.2)",
+                              }}
+                            />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </Grid>
+                )}
                 <Grid item xs={this.state.compact ? 12 : 8}>
                   <div
                     style={{
@@ -415,7 +431,8 @@ class MovieDetails extends Component {
                       }}
                     >
                       {this.state.details.cast
-                        .slice(0, this.state.numActors).map((member, i) => {
+                        .slice(0, this.state.numActors)
+                        .map((member, i) => {
                           return (
                             <CastComponent
                               key={i}

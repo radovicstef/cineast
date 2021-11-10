@@ -2,7 +2,7 @@ from datetime import datetime as dtime
 from django.http.response import Http404
 import pip._vendor.requests as requests
 from rest_framework import serializers
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
 from rest_framework.response import Response
 from .serializers import FavoriteMoviesSerializer, UserSerializer
 from .models import FavoriteMovies, User
@@ -11,6 +11,7 @@ from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 import jwt, datetime
 import pandas as pd
+from api.utils import getUsername
 
 genres_gathered = {}
 
@@ -131,6 +132,9 @@ class AddFavorite(APIView):
             raise AuthenticationFailed("Unauthenticated!")
         user = User.objects.filter(username=payload["username"]).first()
         movie_id = request.data["movie_id"]
+        record = FavoriteMovies.objects.filter(username=user.username).filter(movie_id=movie_id).first()
+        if record:
+            raise PermissionDenied("Already liked this movie!")
         new_favorite = FavoriteMovies()
         new_favorite.username = user.username
         new_favorite.movie_id = movie_id
@@ -139,6 +143,19 @@ class AddFavorite(APIView):
         response.data = {
             "message": "successful"
         }
+        return response
+
+class RemoveFavorite(APIView):
+    def get(self, request, movie_id):
+        username = getUsername(request.COOKIES.get("jwt"))
+        response = Response()
+        if FavoriteMovies.objects.filter(username=username).filter(movie_id=movie_id).first():
+            FavoriteMovies.objects.filter(username=username).filter(movie_id=movie_id).delete()
+            response.data = {
+                "message": "successful"
+            }
+        else:
+            raise PermissionDenied() 
         return response
 
 class UserView(APIView):
@@ -153,6 +170,28 @@ class UserView(APIView):
         user = User.objects.filter(username=payload["username"]).first()
         user_serialized = UserSerializer(user)
         return Response(user_serialized.data)
+
+
+class IsMovieLiked(APIView):
+    def get(self, request, movie_id):
+        token = request.COOKIES.get("jwt")
+        if not token:
+            raise AuthenticationFailed("Unauthenticated!")
+        try:
+            payload = jwt.decode(token, "secret", algorithms=["HS256"])
+        except:
+            raise AuthenticationFailed("Unauthenticated!")
+        username=payload["username"]
+        response = Response()
+        if FavoriteMovies.objects.filter(username=username).filter(movie_id=movie_id).first():
+            response.data = {
+                "isMovieLiked": "true"
+            }
+        else:
+            response.data = {
+                "isMovieLiked": "false"
+            }
+        return response
 
 
 class LogoutView(APIView):
