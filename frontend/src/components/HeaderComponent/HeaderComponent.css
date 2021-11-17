@@ -38,6 +38,7 @@ a:hover {
 .dropdown {
   position: relative;
   display: inline-block;
+  opacity: 50%;
 }
 
 /* Dropdown Content (Hidden by Default) */
@@ -90,4 +91,20 @@ a:hover {
 /* Show the dropdown menu on hover */
 .dropdown:hover .dropdown-content {
   display: block;
+}
+
+.navigation-section {
+  opacity: 50%;
+}
+
+.navigation-section:hover {
+  opacity: 100%;
+}
+
+.dropdown:hover {
+  opacity: 100%;
+}
+
+.search-input {
+  color: "white"
 }

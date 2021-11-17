@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router";
 
 import "./BannerComponent.css";
 
@@ -94,6 +95,7 @@ class BannerComponent extends Component {
                 color: "white",
                 border: "none",
               }}
+              onClick={() => {this.props.history.push("/login")}}
             >
               Join now
             </button>
@@ -105,4 +107,4 @@ class BannerComponent extends Component {
   }
 }
 
-export default BannerComponent;
+export default withRouter(BannerComponent);

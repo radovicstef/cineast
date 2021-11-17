@@ -7,5 +7,7 @@ urlpatterns = [
     path('login', index),
     path('register', index),
     path('welcome', index),
-    path('movie/<int:id>', index)
+    path('movie/<int:id>', index),
+    path('explore', index),
+    path('favorites', index)
 ]

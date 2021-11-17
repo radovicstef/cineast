@@ -68,7 +68,7 @@ class MovieCardComponent extends Component {
           <MovieRatingComponent rating={this.props.rating} />
         </span>
         <div className="card-body" style={{ paddingBottom: "0.5rem" }}>
-          <p style={{ marginBottom: 0 }}>{this.props.title}</p>
+          <p style={{ marginBottom: 0 }} rel="tooltip" title={this.props.title}>{this.props.title.substring(0,20).trim() + ((this.props.title.length > 20) ? "..." : "")}</p>
           <small
             className="text-muted"
             style={{ fontSize: "0.8rem", opacity: "60%" }}

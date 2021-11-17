@@ -1,0 +1,12 @@
+.active a {
+    background-color: #182d3a !important;
+    border-color: #182d3a !important;
+}
+
+.page-link {
+    color: #182d3a;
+}
+
+.page-link:hover {
+    color: #182d3a;
+}

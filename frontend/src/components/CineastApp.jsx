@@ -15,6 +15,8 @@ import AuthenticatedRoute from "./Authentication/AuthenticatedRoute.jsx";
 import AuthenticationService from "./Authentication/AuthenticationService.js";
 import bannerImage from "../../static/images/banner.jpg";
 import "../../static/css/index.css";
+import ExploreComponent from "./ExploreComponent.jsx";
+import FavoritesComponent from "./FavoritesComponent.jsx";
 
 class CineastApp extends Component {
   constructor(props) {
@@ -22,12 +24,16 @@ class CineastApp extends Component {
     this.state = {
       loading: true,
       loggedin: undefined,
+      activeHeaderSection: undefined,
+      searchedMovies: []
     };
     this.finishLoading = this.finishLoading.bind(this);
     this.handleLoggedIn = this.handleLoggedIn.bind(this);
     this.checkIfLoggedIn = this.checkIfLoggedIn.bind(this);
     this.handleLogout = this.handleLogout.bind(this);
     this.startLoading = this.startLoading.bind(this);
+    this.activateHeaderSection = this.activateHeaderSection.bind(this);
+    this.passSearchedMovies = this.passSearchedMovies.bind(this);
   }
   startLoading() {
     this.setState(() => {
@@ -58,6 +64,16 @@ class CineastApp extends Component {
   async checkIfLoggedIn() {
     return AuthenticationService.isUserLoggedIn();
   }
+  activateHeaderSection(headerSection) {
+    this.setState(() => {
+      return {activeHeaderSection: headerSection};
+    });
+  }
+  passSearchedMovies(movies) {
+    this.setState(() => {
+      return {searchedMovies: movies}
+    })
+  }
   render() {
     return (
       <Router>
@@ -66,6 +82,8 @@ class CineastApp extends Component {
             handleLogout={this.handleLogout}
             loggedin={this.state.loggedin}
             startLoading={this.startLoading}
+            activeHeaderSection={this.state.activeHeaderSection}
+            passSearchedMovies={this.passSearchedMovies}
           />
           <div className="App">
             <Switch>
@@ -94,6 +112,14 @@ class CineastApp extends Component {
               <AuthenticatedRoute
                 path="/welcome"
                 component={WelcomeComponent}
+              />
+              <AuthenticatedRoute
+                path="/explore"
+                component={() => <ExploreComponent searchedMovies={this.state.searchedMovies} activeHeaderSection={this.state.activeHeaderSection} activateHeaderSection={this.activateHeaderSection}/>}
+              />
+              <AuthenticatedRoute
+                path="/favorites"
+                component={() => <FavoritesComponent activeHeaderSection={this.state.activeHeaderSection} activateHeaderSection={this.activateHeaderSection}/>}
               />
             </Switch>
           </div>

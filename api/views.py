@@ -1,4 +1,5 @@
 from datetime import datetime as dtime
+from operator import index
 from django.http.response import Http404
 import pip._vendor.requests as requests
 from rest_framework import serializers
@@ -12,12 +13,72 @@ from rest_framework.views import APIView
 import jwt, datetime
 import pandas as pd
 from api.utils import getUsername
+import json
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from nltk.corpus import stopwords
+from iso639 import languages
 
 genres_gathered = {}
 
 API_KEY = "aac569ce5b81de3e31bee34323e9745e"
 
+cachedStopWords = stopwords.words("english")
+
+def combine_features(row):
+    try:
+        cast = row["cast"].replace(" ", "").replace("|", " ").lower()
+        director = row["director"].replace(" ", "").replace("|", " ").lower()
+        genres = row["genres"].replace("|", " ").lower()
+    except:
+        cast = ""
+        director = ""
+        genres = ""
+    #language = str(row["original_language_full"])
+    combined_features = genres + " " + row["original_title"].lower() + " " + cast + " " + director + str(row["overview_short"]).lower()
+    if(row["id"] == 550 or row["id"] == 693):
+        print(combined_features)
+    return combined_features
+
+def remove_stopwords(row):
+    try:
+        overview_short = ' '.join([word.replace(",", "").replace(".", "").replace('"', "").lower() for word in row["overview"].split() if word.replace(",", "").replace(".", "").lower() not in cachedStopWords])      
+        return overview_short
+    except:
+        return row["overview"]
+    #if row["original_language_full"] in cachedStopWords.keys():
+        #try:
+            #overview_short = ' '.join([word.replace(",", "").replace(".", "").lower() for word in row["overview"].split() if word.replace(",", "").replace(".", "").lower() not in cachedStopWords[row["original_language_full"]]][:15])
+            #return overview_short
+        #except:
+            #return row["overview"]
+    #else:
+        #return row["overview"]
+
 movies_df = pd.read_csv("movie_dataset.csv")
+movies_df['json'] = movies_df.apply(lambda x: x.to_json(), axis=1)
+index = movies_df.index
+#movies_df["original_language_full"] = movies_df["original_language"].apply(lambda x: languages.get(alpha2=str(x)).name.lower())
+
+#for language in movies_df["original_language_full"].drop_duplicates():
+    #try:
+        #cachedStopWords[language] = stopwords.words(language)
+        #if language == "english":
+           #print(cachedStopWords[language])
+    #except:
+        #continue
+
+movies_df["overview_short"] = movies_df.apply(remove_stopwords, axis=1)
+
+movies_df["combined_features"] = movies_df.apply(combine_features, axis=1)
+
+cv = CountVectorizer()
+
+count_matrix = cv.fit_transform(movies_df["combined_features"])
+
+cosine_sim = cosine_similarity(count_matrix)
+print("COSINE_SIM")
+print(cosine_sim)
 
 # Create your views here.
 class MovieDetails(APIView):
@@ -55,6 +116,27 @@ class MovieDetails(APIView):
                     movie["writers"] = list_writers
             movie["cast"] = respJson["credits"]["cast"][:5]
             movie["background_image"] = respJson["backdrop_path"]
+            return JsonResponse(movie, safe=False)
+        else:
+            raise Http404
+
+
+class MovieOverview(APIView):
+    def get(self, request, movie_id):
+        resp = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={API_KEY}")
+        resp.encoding = "utf-8"
+        movie = {}
+        if resp.ok:
+            respJson = resp.json()
+            movie["title"] = respJson["title"]
+            movie["overview"] = respJson["overview"]
+            movie["poster_path"] = respJson["poster_path"]
+            movie["rating"] = respJson["vote_average"]
+            movie["genres"] = []
+            for genre in respJson["genres"]:
+                movie["genres"].append(genre["name"])
+            date = dtime.fromisoformat(respJson["release_date"])
+            movie["year"] = date.year
             return JsonResponse(movie, safe=False)
         else:
             raise Http404
@@ -120,6 +202,12 @@ class LoginView(APIView):
             "jwt": token
         }
         return response
+
+class GetFavoriteMovies(APIView):
+    def get(self, request):
+        username = getUsername(request.COOKIES.get("jwt"))
+        favorite_movies = list(FavoriteMovies.objects.filter(username=username).values("movie_id"))
+        return JsonResponse(favorite_movies, safe=False)
 
 class AddFavorite(APIView):
     def post(self, request):
@@ -192,6 +280,73 @@ class IsMovieLiked(APIView):
                 "isMovieLiked": "false"
             }
         return response
+
+class ExploreMovies(APIView):
+    def get(self, request, page):
+        index_begin = (page-1)*12
+        index_end = page*12
+        movies_json = []
+        
+        #for movie_df in movies_df["json"][index_begin:index_end]:
+            #movies_json.append(json.loads(movie_df))
+
+        username = getUsername(request.COOKIES.get("jwt"))
+        favorite_movies = list(FavoriteMovies.objects.filter(username=username).values("movie_id"))
+
+        if(len(favorite_movies) == 0):
+            pass
+
+        favorite_movies_index = []
+        print("FAV MOVIES INDEX")
+        for favorite_movie in favorite_movies:
+            #print("----------------")
+            #print("id: " + str(favorite_movie["movie_id"]))
+            #print(movies_df.loc[movies_df['id'] == favorite_movie["movie_id"]].iloc[0]["index"])
+            favorite_movies_index.append(index[movies_df['id'] == favorite_movie["movie_id"]].tolist()[0])
+
+        print(favorite_movies_index)
+
+        similar_movies = []
+        i = 0
+        for favorite_movie in favorite_movies_index:
+            if i == 0:
+                i=1
+                similar_movies =  list(enumerate(cosine_sim[favorite_movie]))
+            else:
+                new_similarity = list(enumerate(cosine_sim[favorite_movie]))
+                for i in range(0, len(similar_movies)):
+                    similar_movies[i] = (similar_movies[i][0], similar_movies[i][1] + new_similarity[i][1])
+
+
+        sorted_similar_movies = sorted(similar_movies,key=lambda x:x[1],reverse=True)
+
+        print(sorted_similar_movies[0:12])
+
+        end_index = 12
+        if len(sorted_similar_movies) < 12:
+            end_index = len(sorted_similar_movies)
+
+        for i in range(0, end_index):
+            try:
+                movies_json.append(json.loads(movies_df.iloc[sorted_similar_movies[i][0]]["json"]))
+            except:
+                continue
+
+        return JsonResponse(movies_json, safe=False)
+
+class GetNumPages(APIView):
+    def get(self, request):
+        return JsonResponse(int(movies_df.shape[0]/12), safe=False)
+
+
+class SearchMovie(APIView):
+    def get(self,request, movie):
+        searched_movies = movies_df["json"][movies_df["original_title"].str.contains(movie, na=False, case=False)]
+        searched_movies = searched_movies.tolist()[0:3]
+        searched_movies_json = []
+        for searched_movie in searched_movies:
+            searched_movies_json.append(json.loads(searched_movie))
+        return JsonResponse(searched_movies_json, safe=False)
 
 
 class LogoutView(APIView):

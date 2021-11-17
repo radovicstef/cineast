@@ -2,12 +2,19 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
+import SearchIcon from "@material-ui/icons/Search";
+import { InputAdornment } from "@material-ui/core";
 import "./HeaderComponent.css";
+import { TextField } from "@material-ui/core";
 
 class HeaderComponent extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      searchedInput: ""
+    }
     this.onLogout = this.onLogout.bind(this);
+    this.onSearch = this.onSearch.bind(this);
   }
   onLogout() {
     this.props.startLoading();
@@ -19,6 +26,22 @@ class HeaderComponent extends Component {
         this.props.handleLogout();
       }
     });
+  }
+  onSearch(event) {
+    event.preventDefault();
+    if (event.target.value == "") {
+      this.props.passSearchedMovies([])
+    } else {
+      console.log(event.target.value);
+      fetch(`http://localhost:8000/api/search/${event.target.value}`)
+        .then((reply) => reply.json())
+        .then((data) => {
+          this.props.passSearchedMovies(data);
+        });
+    }
+    this.setState(() => {
+      return {searchedInput: event.target.value}
+    })
   }
   render() {
     return (
@@ -85,13 +108,45 @@ class HeaderComponent extends Component {
                   </Link>
                 </li>
               )}
+              {this.props.loggedin &&
+                this.props.activeHeaderSection === "explore" && (
+                  <li
+                    className="nav-item"
+                    style={{ padding: "0.5rem", textAlign: "right" }}
+                  >
+                    <TextField
+                      autoFocus
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon style={{ fill: "white" }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                      inputProps={{
+                        style: { color: "white" },
+                      }}
+                      key="searchedInput"
+                      type="text"
+                      name="searchedInput"
+                      value={this.state.searchedInput}
+                      placeholder="Search movies..."
+                      onChange={this.onSearch}
+                    />
+                  </li>
+                )}
               {this.props.loggedin && (
                 <li
                   className="nav-item"
                   style={{ padding: "0.7rem", textAlign: "right" }}
                 >
-                  <Link className="header-item" to="/login">
-                    <span>Explore</span>
+                  <Link className="header-item" to="/explore">
+                    {this.props.activeHeaderSection !== "explore" && (
+                      <span className="navigation-section">Explore</span>
+                    )}
+                    {this.props.activeHeaderSection === "explore" && (
+                      <span style={{ opacity: "100%" }}>Explore</span>
+                    )}
                   </Link>
                 </li>
               )}
@@ -100,8 +155,13 @@ class HeaderComponent extends Component {
                   className="nav-item"
                   style={{ padding: "0.7rem", textAlign: "right" }}
                 >
-                  <Link className="header-item" to="/login">
-                    <span>Favorites</span>
+                  <Link className="header-item" to="/favorites">
+                    {this.props.activeHeaderSection !== "favorites" && (
+                      <span className="navigation-section">Favorites</span>
+                    )}
+                    {this.props.activeHeaderSection === "favorites" && (
+                      <span style={{ opacity: "100%" }}>Favorites</span>
+                    )}
                   </Link>
                 </li>
               )}
