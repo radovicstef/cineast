@@ -8,6 +8,6 @@ urlpatterns = [
     path('register', index),
     path('welcome', index),
     path('movie/<int:id>', index),
-    path('explore', index),
+    path('explore/<int:page>', index),
     path('favorites', index)
 ]

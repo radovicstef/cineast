@@ -24,6 +24,9 @@ class MovieCardWrapperComponent extends Component {
         {this.state.movie_info !== undefined && (
           <div>
             <MovieCardComponent
+              loadFavorites={this.props.loadFavorites}
+              loadMovies={this.props.loadMovies}
+              pageNumber={this.props.pageNumber}
               key={this.props.movie_id}
               title={this.state.movie_info.title}
               poster_path={this.state.movie_info.poster_path}

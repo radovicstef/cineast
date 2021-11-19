@@ -12,6 +12,8 @@ class RegisterComponent extends Component {
     this.state = {
       username: "",
       password: "",
+      successinfo: false,
+      failedinfo: false,
       passwordVisible: false,
     };
     this.submitRegister = this.submitRegister.bind(this);
@@ -42,7 +44,11 @@ class RegisterComponent extends Component {
     fetch(request).then((response) => {
       if (response.ok) {
         this.setState(() => {
-          return {username: "", password: ""}
+          return { username: "", password: "", successinfo: true };
+        });
+      } else {
+        this.setState(() => {
+          return { failedinfo: true };
         });
       }
     });
@@ -93,6 +99,11 @@ class RegisterComponent extends Component {
                         </span>
                       </div>
                       <input
+                        onFocus={() => {
+                          this.setState(() => {
+                            return { failedinfo: false, successinfo: false };
+                          });
+                        }}
                         type="text"
                         className="form-control"
                         id="validationCustomUsername"
@@ -123,6 +134,11 @@ class RegisterComponent extends Component {
                         </span>
                       </div>
                       <input
+                        onFocus={() => {
+                          this.setState(() => {
+                            return { failedinfo: false, successinfo: false };
+                          });
+                        }}
                         type={this.state.passwordVisible ? "text" : "password"}
                         className="form-control"
                         id="validationCustomUsername"
@@ -138,6 +154,16 @@ class RegisterComponent extends Component {
                       </div>
                     </div>
                   </div>
+                  {this.state.failedinfo && (
+                    <div className="alert alert-danger">
+                      Invalid username/password or this username already taken!
+                    </div>
+                  )}
+                  {this.state.successinfo && (
+                    <div className="alert alert-success">
+                      Successfully signed up!
+                    </div>
+                  )}
                   <div style={{ marginBottom: "2rem" }}>
                     <button
                       onClick={this.submitRegister}

@@ -59,6 +59,7 @@ class TrendingMoviesComponent extends Component {
             return (
               <MovieCardComponent
                 key={i}
+                id={item.id}
                 title={item.title}
                 poster_path={item.poster_path}
                 rating={item.vote_average}

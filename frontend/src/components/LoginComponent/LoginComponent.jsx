@@ -28,15 +28,16 @@ class LoginComponent extends Component {
       },
       body: JSON.stringify(data),
     });
-    fetch(request)
-      .then(
-        (response) => {
-          if(response.ok){
-            this.props.handleLoggedIn();
-            this.props.history.push("/welcome");
-          }
-        }
-      )
+    fetch(request).then((response) => {
+      if (response.ok) {
+        this.props.handleLoggedIn();
+        this.props.history.push("/welcome");
+      } else {
+        this.setState(() => {
+          return { hasLoginFailed: true };
+        });
+      }
+    });
   }
   handleChangeInput(event) {
     this.setState(() => {
@@ -89,6 +90,11 @@ class LoginComponent extends Component {
                         </span>
                       </div>
                       <input
+                        onFocus={() => {
+                          this.setState(() => {
+                            return { hasLoginFailed: false };
+                          });
+                        }}
                         type="text"
                         className="form-control"
                         id="validationCustomUsername"
@@ -113,6 +119,11 @@ class LoginComponent extends Component {
                         </span>
                       </div>
                       <input
+                        onFocus={() => {
+                          this.setState(() => {
+                            return { hasLoginFailed: false };
+                          });
+                        }}
                         type="password"
                         className="form-control"
                         id="validationCustomUsername"
@@ -128,6 +139,11 @@ class LoginComponent extends Component {
                       </div>
                     </div>
                   </div>
+                  {this.state.hasLoginFailed && (
+                    <div className="alert alert-danger">
+                      Invalid username/password or this username already taken!
+                    </div>
+                  )}
                   <div style={{ marginBottom: "2rem" }}>
                     <button
                       onClick={this.submitLogin}

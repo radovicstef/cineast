@@ -114,7 +114,7 @@ class CineastApp extends Component {
                 component={WelcomeComponent}
               />
               <AuthenticatedRoute
-                path="/explore"
+                path="/explore/:page"
                 component={() => <ExploreComponent searchedMovies={this.state.searchedMovies} activeHeaderSection={this.state.activeHeaderSection} activateHeaderSection={this.activateHeaderSection}/>}
               />
               <AuthenticatedRoute

@@ -7,14 +7,20 @@ class FavoritesComponent extends Component {
     this.state = {
       favoriteMovies: [],
     };
+    this.loadFavorites = this.loadFavorites.bind(this);
   }
   componentDidMount() {
     if (this.props.activeHeaderSection !== "favorites") {
       this.props.activateHeaderSection("favorites");
     }
+    this.loadFavorites();
+  }
+  loadFavorites() {
     fetch("http://localhost:8000/api/favorites")
       .then((reply) => reply.json())
       .then((data) => {
+        console.log("FAVORITES");
+        console.log(data)
         this.setState(() => {
           return { favoriteMovies: data };
         });
@@ -32,7 +38,7 @@ class FavoritesComponent extends Component {
         <div className="container">
           <div className="row" style={{justifyContent: "space-between"}}>
             {this.state.favoriteMovies.map((movie, i) => {
-              return <div className="col"><MovieCardWrapperComponent movie_id={movie.movie_id} /></div>;
+              return <div className="col"><MovieCardWrapperComponent key={movie.movie_id} loadFavorites={this.loadFavorites} movie_id={movie.movie_id} /></div>;
             })}
             {this.state.favoriteMovies.length%3 === 2 && <div className="col"></div>}
           </div>

@@ -140,7 +140,7 @@ class HeaderComponent extends Component {
                   className="nav-item"
                   style={{ padding: "0.7rem", textAlign: "right" }}
                 >
-                  <Link className="header-item" to="/explore">
+                  <Link className="header-item" to="/explore/1">
                     {this.props.activeHeaderSection !== "explore" && (
                       <span className="navigation-section">Explore</span>
                     )}

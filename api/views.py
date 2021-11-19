@@ -25,6 +25,43 @@ API_KEY = "aac569ce5b81de3e31bee34323e9745e"
 
 cachedStopWords = stopwords.words("english")
 
+similar_movies = []
+sorted_similar_movies = []
+favorite_movies = []
+
+def find_similar_movies(username):
+    global favorite_movies
+    print("Finding similar movies...")
+    global similar_movies, sorted_similar_movies
+    favorite_movies = list(FavoriteMovies.objects.filter(username=username).values("movie_id"))
+
+    if(len(favorite_movies) == 0):
+        pass
+
+    favorite_movies_index = []
+    print("Favorite movies:")
+    for favorite_movie in favorite_movies:
+        #print("----------------")
+        #print("id: " + str(favorite_movie["movie_id"]))
+        #print(movies_df.loc[movies_df['id'] == favorite_movie["movie_id"]].iloc[0]["index"])
+        favorite_movies_index.append(index[movies_df['id'] == favorite_movie["movie_id"]].tolist()[0])
+
+    print(favorite_movies_index)
+
+    i = 0
+    for favorite_movie in favorite_movies_index:
+        if i == 0:
+            i=1
+            similar_movies =  list(enumerate(cosine_sim[favorite_movie]))
+        else:
+            new_similarity = list(enumerate(cosine_sim[favorite_movie]))
+            for i in range(0, len(similar_movies)):
+                similar_movies[i] = (similar_movies[i][0], similar_movies[i][1] + new_similarity[i][1])
+
+
+    sorted_similar_movies = sorted(similar_movies,key=lambda x:x[1],reverse=True)
+
+
 def combine_features(row):
     try:
         cast = row["cast"].replace(" ", "").replace("|", " ").lower()
@@ -36,8 +73,6 @@ def combine_features(row):
         genres = ""
     #language = str(row["original_language_full"])
     combined_features = genres + " " + row["original_title"].lower() + " " + cast + " " + director + str(row["overview_short"]).lower()
-    if(row["id"] == 550 or row["id"] == 693):
-        print(combined_features)
     return combined_features
 
 def remove_stopwords(row):
@@ -135,8 +170,11 @@ class MovieOverview(APIView):
             movie["genres"] = []
             for genre in respJson["genres"]:
                 movie["genres"].append(genre["name"])
-            date = dtime.fromisoformat(respJson["release_date"])
-            movie["year"] = date.year
+            try:
+                date = dtime.fromisoformat(respJson["release_date"])
+                movie["year"] = date.year
+            except:
+                movie["year"] = ""
             return JsonResponse(movie, safe=False)
         else:
             raise Http404
@@ -201,6 +239,7 @@ class LoginView(APIView):
         response.data = {
             "jwt": token
         }
+        find_similar_movies(username)
         return response
 
 class GetFavoriteMovies(APIView):
@@ -227,6 +266,7 @@ class AddFavorite(APIView):
         new_favorite.username = user.username
         new_favorite.movie_id = movie_id
         new_favorite.save()
+        find_similar_movies(user.username)
         response = Response()
         response.data = {
             "message": "successful"
@@ -239,6 +279,7 @@ class RemoveFavorite(APIView):
         response = Response()
         if FavoriteMovies.objects.filter(username=username).filter(movie_id=movie_id).first():
             FavoriteMovies.objects.filter(username=username).filter(movie_id=movie_id).delete()
+            find_similar_movies(username)
             response.data = {
                 "message": "successful"
             }
@@ -283,50 +324,14 @@ class IsMovieLiked(APIView):
 
 class ExploreMovies(APIView):
     def get(self, request, page):
-        index_begin = (page-1)*12
-        index_end = page*12
+        index_begin = (page-1)*12 + len(favorite_movies)
+        index_end = page*12 + len(favorite_movies)
         movies_json = []
         
         #for movie_df in movies_df["json"][index_begin:index_end]:
             #movies_json.append(json.loads(movie_df))
 
-        username = getUsername(request.COOKIES.get("jwt"))
-        favorite_movies = list(FavoriteMovies.objects.filter(username=username).values("movie_id"))
-
-        if(len(favorite_movies) == 0):
-            pass
-
-        favorite_movies_index = []
-        print("FAV MOVIES INDEX")
-        for favorite_movie in favorite_movies:
-            #print("----------------")
-            #print("id: " + str(favorite_movie["movie_id"]))
-            #print(movies_df.loc[movies_df['id'] == favorite_movie["movie_id"]].iloc[0]["index"])
-            favorite_movies_index.append(index[movies_df['id'] == favorite_movie["movie_id"]].tolist()[0])
-
-        print(favorite_movies_index)
-
-        similar_movies = []
-        i = 0
-        for favorite_movie in favorite_movies_index:
-            if i == 0:
-                i=1
-                similar_movies =  list(enumerate(cosine_sim[favorite_movie]))
-            else:
-                new_similarity = list(enumerate(cosine_sim[favorite_movie]))
-                for i in range(0, len(similar_movies)):
-                    similar_movies[i] = (similar_movies[i][0], similar_movies[i][1] + new_similarity[i][1])
-
-
-        sorted_similar_movies = sorted(similar_movies,key=lambda x:x[1],reverse=True)
-
-        print(sorted_similar_movies[0:12])
-
-        end_index = 12
-        if len(sorted_similar_movies) < 12:
-            end_index = len(sorted_similar_movies)
-
-        for i in range(0, end_index):
+        for i in range(index_begin, index_end):
             try:
                 movies_json.append(json.loads(movies_df.iloc[sorted_similar_movies[i][0]]["json"]))
             except:
@@ -341,8 +346,11 @@ class GetNumPages(APIView):
 
 class SearchMovie(APIView):
     def get(self,request, movie):
+        searched_movies_same = movies_df["json"][movies_df["original_title"].str.lower() == movie.lower()]
         searched_movies = movies_df["json"][movies_df["original_title"].str.contains(movie, na=False, case=False)]
-        searched_movies = searched_movies.tolist()[0:3]
+        searched_movies_same = searched_movies_same.tolist()
+        searched_movies_same_length = len(searched_movies_same) if len(searched_movies_same)!=0 else 1
+        searched_movies = searched_movies_same + searched_movies.tolist()[0:3*searched_movies_same_length - len(searched_movies_same)]
         searched_movies_json = []
         for searched_movie in searched_movies:
             searched_movies_json.append(json.loads(searched_movie))
