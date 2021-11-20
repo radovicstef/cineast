@@ -18,10 +18,9 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from nltk.corpus import stopwords
 from iso639 import languages
+from api.constants import API_KEY
 
 genres_gathered = {}
-
-API_KEY = "aac569ce5b81de3e31bee34323e9745e"
 
 cachedStopWords = stopwords.words("english")
 

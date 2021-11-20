@@ -7,3 +7,4 @@ frontend/static/frontend/
 *.csv
 frontend/static/images/explore.jpg
 frontend/static/images/welcome.jpg
+api/constants.py
