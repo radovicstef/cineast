@@ -346,13 +346,18 @@ class GetNumPages(APIView):
 
 class SearchMovie(APIView):
     def get(self,request, movie):
-        searched_movies_same = movies_df["json"][movies_df["original_title"].str.lower() == movie.lower()]
-        searched_movies = movies_df["json"][movies_df["original_title"].str.contains(movie, na=False, case=False)]
-        searched_movies_same = searched_movies_same.tolist()
-        searched_movies_same_length = len(searched_movies_same) if len(searched_movies_same)!=0 else 1
-        searched_movies = searched_movies_same + searched_movies.tolist()[0:3*searched_movies_same_length - len(searched_movies_same)]
+        searched_movies_same = movies_df[movies_df["original_title"].str.lower() == movie.lower()]
+        searched_movies = movies_df[movies_df["original_title"].str.contains(movie, na=False, case=False)]
+        searched_movies_list = searched_movies["json"].tolist()
+        searched_movies_same_list = searched_movies_same["json"].tolist()
+        for movie in searched_movies_same["id"].tolist():
+            if movie in searched_movies["id"].tolist()[:3]:
+                searched_movies_same_list = []
+                break
+        searched_movies_same_length = len(searched_movies_same_list) if len(searched_movies_same_list)!=0 else 1
+        searched_movies_list = searched_movies_same_list + searched_movies_list[0:3*searched_movies_same_length - len(searched_movies_same_list)]
         searched_movies_json = []
-        for searched_movie in searched_movies:
+        for searched_movie in searched_movies_list:
             searched_movies_json.append(json.loads(searched_movie))
         return JsonResponse(searched_movies_json, safe=False)
 

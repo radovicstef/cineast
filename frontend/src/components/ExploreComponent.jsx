@@ -73,7 +73,7 @@ class ExploreComponent extends Component {
     console.log("MOVIES LENGTH : " + this.state.movies.length);
     return (
       <div>
-        <div className="container">
+        <div className="container" style={{minHeight: "90vh"}}>
           {this.state.movies.length !== 0 && (
             <div className="row" style={{ alignItems: "center" }}>
               {this.state.movies.map((movie, i) => {
