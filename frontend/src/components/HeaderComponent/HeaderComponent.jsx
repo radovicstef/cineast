@@ -46,7 +46,7 @@ class HeaderComponent extends Component {
   render() {
     return (
       <div className="sticky-top">
-        <nav className="navbar navbar-expand-lg navbar-light navbar-custom">
+        <nav className="navbar navbar-expand-lg navbar-dark navbar-custom">
           <div
             className="navbar-header"
             style={{ paddingTop: "0.7rem", paddingBottom: "0.7rem" }}

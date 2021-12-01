@@ -27,3 +27,7 @@
         opacity: 1
     }
 }
+
+.filter{
+    background: linear-gradient(to bottom, #182d3a, #2f4858);
+}

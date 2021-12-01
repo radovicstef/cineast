@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import AddFavorite, ExploreMovies, GetFavoriteMovies, GetNumPages, IsMovieLiked, LoginView, LogoutView, MovieDetails, MovieOverview, RemoveFavorite, SearchMovie, TrendingMoviesView, RegisterView, UserView
+from .views import AddFavorite, ExploreMovies, FilterSortedMovies, GetFavoriteMovies, GetNumPages, IsMovieLiked, LoginView, LogoutView, MovieDetails, MovieOverview, RemoveFavorite, SearchMovie, TrendingMoviesView, RegisterView, UserView
 
 urlpatterns = [
     path('register', RegisterView.as_view()),
@@ -15,5 +15,6 @@ urlpatterns = [
     path('movie_overview/<int:movie_id>/', MovieOverview.as_view()),
     path('explore/<int:page>', ExploreMovies.as_view()),
     path('explore/pages', GetNumPages.as_view()),
-    path("search/<str:movie>", SearchMovie.as_view())
+    path("search/<str:movie>", SearchMovie.as_view()),
+    path("filter/<str:genre>/<str:rating>/<str:year>", FilterSortedMovies.as_view())
 ]

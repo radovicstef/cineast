@@ -25,13 +25,14 @@ genres_gathered = {}
 cachedStopWords = stopwords.words("english")
 
 similar_movies = []
+filtered_similar_movies = []
 sorted_similar_movies = []
 favorite_movies = []
 
 def find_similar_movies(username):
     global favorite_movies
     print("Finding similar movies...")
-    global similar_movies, sorted_similar_movies
+    global similar_movies, sorted_similar_movies, filtered_similar_movies
     favorite_movies = list(FavoriteMovies.objects.filter(username=username).values("movie_id"))
 
     if(len(favorite_movies) == 0):
@@ -59,6 +60,7 @@ def find_similar_movies(username):
 
 
     sorted_similar_movies = sorted(similar_movies,key=lambda x:x[1],reverse=True)
+    filtered_similar_movies = [i[0] for i in sorted_similar_movies]
 
 
 def combine_features(row):
@@ -332,15 +334,47 @@ class ExploreMovies(APIView):
 
         for i in range(index_begin, index_end):
             try:
-                movies_json.append(json.loads(movies_df.iloc[sorted_similar_movies[i][0]]["json"]))
+                movies_json.append(json.loads(movies_df.iloc[filtered_similar_movies[i]]["json"]))
             except:
                 continue
 
         return JsonResponse(movies_json, safe=False)
 
+class FilterSortedMovies(APIView):
+    def get(self, request, genre, rating, year):
+        global filtered_similar_movies
+        print("HEEEELO")
+        print(sorted_similar_movies[0:10])
+        filtered_similar_movies = [i[0] for i in sorted_similar_movies]
+        movies_query = movies_df
+        if(genre != "All"):
+            movies_query = movies_query[movies_query["genres"].str.contains(genre, na=False)]
+        if(rating != "All"):
+            if(rating == "5+"):
+                movies_query = movies_query.query('vote_average >= 5')
+            if(rating == "7+"):
+                movies_query = movies_query.query('vote_average >= 7')
+            if(rating == "9+"):
+                movies_query = movies_query.query('vote_average >= 9')
+        if(year != "All"):
+            if(year == "1950-1990"):
+                movies_query = movies_query.query('release_year >= 1950 and release_year <= 1990')
+            if(year == "1990-2000"):
+                movies_query = movies_query.query('release_year >= 1990 and release_year <= 2000')
+            if(year == "2000-2010"):
+                movies_query = movies_query.query('release_year >= 2000 and release_year <= 2010')
+            if(year == "2010-2021"):
+                movies_query = movies_query.query('release_year >= 2010 and release_year <= 2021')
+        movies_query = movies_query.index.tolist()
+        sorted_movies = [i[0] for i in sorted_similar_movies]
+        sorted_movies_set = set(sorted_movies)
+        movies_query_set = set(movies_query)
+        filtered_similar_movies = sorted(sorted_movies_set & movies_query_set, key=sorted_movies.index)
+        return JsonResponse(filtered_similar_movies, safe=False)
+
 class GetNumPages(APIView):
     def get(self, request):
-        return JsonResponse(int(movies_df.shape[0]/12), safe=False)
+        return JsonResponse(int(len(filtered_similar_movies)/12), safe=False)
 
 
 class SearchMovie(APIView):

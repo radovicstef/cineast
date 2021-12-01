@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import MovieCardWrapperComponent from "./MovieCardWrapperComponent.jsx";
+import explore from "../../static/images/explore.jpg";
 
 class FavoritesComponent extends Component {
   constructor(props) {
@@ -35,13 +36,21 @@ class FavoritesComponent extends Component {
     console.log("favoriteMovies: " + this.state.favoriteMovies);
     return (
       <div>
-        <div className="container">
-          <div className="row" style={{justifyContent: "space-between"}}>
+        <div className="container" style={{ minHeight: "90vh" }}>
+          {this.state.favoriteMovies.length !== 0 && <div className="row" style={{justifyContent: "space-between"}}>
             {this.state.favoriteMovies.map((movie, i) => {
               return <div className="col"><MovieCardWrapperComponent key={movie.movie_id} loadFavorites={this.loadFavorites} movie_id={movie.movie_id} /></div>;
             })}
             {this.state.favoriteMovies.length%3 === 2 && <div className="col"></div>}
-          </div>
+          </div>}
+          {this.state.favoriteMovies.length === 0 && (
+            <div>
+              <img style={{ marginTop: "3rem", width: "50%" }} src={explore} />
+              <div className="start-searching" style={{ marginBottom: "3rem" }}>
+                Start searching movies in explore section and add to favorites...
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
