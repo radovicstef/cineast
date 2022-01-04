@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import MovieCardWrapperComponent from "./MovieCardWrapperComponent.jsx";
-import explore from "../../static/images/explore.jpg";
+import MovieCardWrapperComponent from "../MovieCard/MovieCardWrapperComponent.jsx";
+import explore from "../../../static/images/explore.jpg";
 
 class FavoritesComponent extends Component {
   constructor(props) {

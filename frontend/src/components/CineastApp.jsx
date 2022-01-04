@@ -4,19 +4,19 @@ import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import BannerComponent from "./BannerComponent/BannerComponent.jsx";
 import FooterComponent from "./FooterComponent/FooterComponent.jsx";
 import HeaderComponent from "./HeaderComponent/HeaderComponent.jsx";
-import TrendingMoviesComponent from "./TrendingMoviesComponent.jsx";
+import TrendingMoviesComponent from "./TrendingMoviesComponent/TrendingMoviesComponent.jsx";
 import LoginComponent from "./LoginComponent/LoginComponent.jsx";
 import ProcessingComponent from "./ProcessingComponent/ProcessingComponent.jsx";
 import RegisterComponent from "./RegisterComponent/RegisterComponent.jsx";
-import WelcomeComponent from "./WelcomeComponent.jsx";
+import WelcomeComponent from "./WelcomeComponent/WelcomeComponent.jsx";
 import MovieDetails from "./MovieDetails/MovieDetails.jsx";
 import AuthenticatedRoute from "./Authentication/AuthenticatedRoute.jsx";
 
 import AuthenticationService from "./Authentication/AuthenticationService.js";
 import bannerImage from "../../static/images/banner.jpg";
 import "../../static/css/index.css";
-import ExploreComponent from "./ExploreComponent.jsx";
-import FavoritesComponent from "./FavoritesComponent.jsx";
+import ExploreComponent from "./ExploreComponent/ExploreComponent.jsx";
+import FavoritesComponent from "./FavoritesComponent/FavoritesComponent.jsx";
 
 class CineastApp extends Component {
   constructor(props) {

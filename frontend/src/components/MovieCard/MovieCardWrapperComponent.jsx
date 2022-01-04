@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import MovieCardComponent from "./MovieCard/MovieCardComponent.jsx";
+import MovieCardComponent from "./MovieCardComponent.jsx";
 
 
 class MovieCardWrapperComponent extends Component {

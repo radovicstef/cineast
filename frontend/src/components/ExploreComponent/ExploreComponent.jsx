@@ -3,9 +3,10 @@ import ReactPaginate from "react-paginate";
 import { withRouter } from "react-router";
 
 import "./ExploreComponent.css";
-import MovieCardWrapperComponent from "./MovieCardWrapperComponent.jsx";
-import explore from "../../static/images/explore.jpg";
-import FilterComponent from "./FilterComponent.jsx";
+import "../ExploreComponent/ExploreComponent.jsx";
+import MovieCardWrapperComponent from "../MovieCard/MovieCardWrapperComponent.jsx";
+import explore from "../../../static/images/explore.jpg";
+import FilterComponent from "../FilterComponent/FilterComponent.jsx";
 import TuneIcon from "@material-ui/icons/Tune";
 
 class ExploreComponent extends Component {

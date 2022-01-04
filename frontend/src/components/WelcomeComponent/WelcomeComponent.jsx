@@ -3,7 +3,7 @@ import React, { Component } from "react";
 import { withRouter } from "react-router";
 
 import "./WelcomeComponent.css";
-import welcomeimage from "../../static/images/welcome.jpg";
+import welcomeimage from "../../../static/images/welcome.jpg";
 
 class WelcomeComponent extends Component {
   constructor(props) {

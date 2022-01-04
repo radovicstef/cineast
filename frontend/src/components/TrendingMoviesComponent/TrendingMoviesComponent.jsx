@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import MovieCardComponent from "./MovieCard/MovieCardComponent.jsx";
+import MovieCardComponent from "../MovieCard/MovieCardComponent.jsx";
 import Carousel from "react-material-ui-carousel";
 
 class TrendingMoviesComponent extends Component {
