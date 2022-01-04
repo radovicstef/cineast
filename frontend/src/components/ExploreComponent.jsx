@@ -6,7 +6,7 @@ import "./ExploreComponent.css";
 import MovieCardWrapperComponent from "./MovieCardWrapperComponent.jsx";
 import explore from "../../static/images/explore.jpg";
 import FilterComponent from "./FilterComponent.jsx";
-import TuneIcon from '@material-ui/icons/Tune';
+import TuneIcon from "@material-ui/icons/Tune";
 
 class ExploreComponent extends Component {
   isMounted = false;
@@ -112,66 +112,74 @@ class ExploreComponent extends Component {
     console.log("MOVIES LENGTH : " + this.state.movies.length);
     return (
       <div>
-        {this.state.movies.length !== 0 && <div
-          className="filter"
-          style={{
-            position: "relative",
-            display: "flex",
-            width: "100%",
-            paddingTop: "0.5rem",
-            paddingBottom: "1rem",
-            marginBottom: "0.2rem",
-            paddingLeft: "25%",
-            paddingRight: "25%",
-            float: "left",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <FilterComponent
-            updateFilter={this.changeGenre}
-            type="Genre"
-            className="filter-component"
-            values={[
-              "All",
-              "Action",
-              "Adventure",
-              "Animation",
-              "Biography",
-              "Crime",
-              "Comedy",
-              "Crime",
-              "Documentary",
-              "Drama",
-              "Family",
-              "Science Fiction",
-              "History",
-              "Horror",
-              "Mistery",
-              "Romance",
-              "Thriller",
-            ]}
-            default="All"
-          />
-          <FilterComponent
-            updateFilter={this.changeRating}
-            type="Rating"
-            values={["All", "5+", "7+", "9+"]}
-            default="All"
-          />
-          <FilterComponent
-            updateFilter={this.changeYear}
-            type="Year"
-            values={["All", "1950-1990", "1990-2000", "2000-2010", "2010-2021"]}
-            default="All"
-          />
-          <button onClick={this.filterMovies} className="btn btn-secondary">
-            <TuneIcon/>
-          </button>
-        </div>}
+        {this.state.movies.length !== 0 && (
+          <div
+            className="filter"
+            style={{
+              position: "relative",
+              display: "flex",
+              width: "100%",
+              paddingTop: "0.5rem",
+              paddingBottom: "1rem",
+              marginBottom: "0.2rem",
+              paddingLeft: "25%",
+              paddingRight: "25%",
+              float: "left",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <FilterComponent
+              updateFilter={this.changeGenre}
+              type="Genre"
+              className="filter-component"
+              values={[
+                "All",
+                "Action",
+                "Adventure",
+                "Animation",
+                "Biography",
+                "Crime",
+                "Comedy",
+                "Crime",
+                "Documentary",
+                "Drama",
+                "Family",
+                "Science Fiction",
+                "History",
+                "Horror",
+                "Mistery",
+                "Romance",
+                "Thriller",
+              ]}
+              default="All"
+            />
+            <FilterComponent
+              updateFilter={this.changeRating}
+              type="Rating"
+              values={["All", "5+", "7+", "9+"]}
+              default="All"
+            />
+            <FilterComponent
+              updateFilter={this.changeYear}
+              type="Year"
+              values={[
+                "All",
+                "1950-1990",
+                "1990-2000",
+                "2000-2010",
+                "2010-2021",
+              ]}
+              default="All"
+            />
+            <button onClick={this.filterMovies} className="btn btn-secondary">
+              <TuneIcon />
+            </button>
+          </div>
+        )}
         <div>
-          <div className="container" style={{ minHeight: "90vh" }}>
-            {this.state.movies.length !== 0 && (
+          {this.state.movies.length !== 0 && (
+            <div className="container" style={{ minHeight: "90vh" }}>
               <div className="row" style={{ alignItems: "center" }}>
                 {this.state.movies.map((movie, i) => {
                   return (
@@ -185,8 +193,8 @@ class ExploreComponent extends Component {
                   );
                 })}
               </div>
-            )}
-          </div>
+            </div>
+          )}
           {this.state.movies.length === 0 && (
             <div>
               <img style={{ marginTop: "3rem", width: "50%" }} src={explore} />

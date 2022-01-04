@@ -29,6 +29,13 @@ filtered_similar_movies = []
 sorted_similar_movies = []
 favorite_movies = []
 
+# Gather genres
+resp = requests.get(f"https://api.themoviedb.org/3/genre/movie/list?api_key={API_KEY}")
+print("REEEESP!")
+genres = resp.json()
+for genre in genres["genres"]:
+    genres_gathered[genre["id"]] = genre["name"]
+
 def find_similar_movies(username):
     global favorite_movies
     print("Finding similar movies...")
@@ -203,7 +210,8 @@ def TrendingMoviesView(request):
             if(genre_id in genres_gathered):
                 genre_names.append(genres_gathered[genre_id])
             else:
-                genre_resp = requests.get("https://api.themoviedb.org/3/genre/{}?api_key=aac569ce5b81de3e31bee34323e9745e".format(genre_id))
+                print(genre_id)
+                genre_resp = requests.get("https://api.themoviedb.org/3/genre/{}?api_key={API_KEY}".format(genre_id))
                 genre_respJson = genre_resp.json()
                 id = genre_respJson["id"]
                 name = genre_respJson["name"]
