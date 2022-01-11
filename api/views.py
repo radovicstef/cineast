@@ -20,21 +20,22 @@ from nltk.corpus import stopwords
 from iso639 import languages
 from api.constants import API_KEY
 
+# Global variables
 genres_gathered = {}
-
 cachedStopWords = stopwords.words("english")
-
 similar_movies = []
 filtered_similar_movies = []
 sorted_similar_movies = []
 favorite_movies = []
 
 # Gather genres
-resp = requests.get(f"https://api.themoviedb.org/3/genre/movie/list?api_key={API_KEY}")
-print("REEEESP!")
-genres = resp.json()
-for genre in genres["genres"]:
-    genres_gathered[genre["id"]] = genre["name"]
+def gather_genres():
+    global genres_gathered
+    resp = requests.get(f"https://api.themoviedb.org/3/genre/movie/list?api_key={API_KEY}")
+    genres = resp.json()
+    for genre in genres["genres"]:
+        genres_gathered[genre["id"]] = genre["name"]
+
 
 def find_similar_movies(username):
     global favorite_movies
@@ -46,14 +47,8 @@ def find_similar_movies(username):
         pass
 
     favorite_movies_index = []
-    print("Favorite movies:")
     for favorite_movie in favorite_movies:
-        #print("----------------")
-        #print("id: " + str(favorite_movie["movie_id"]))
-        #print(movies_df.loc[movies_df['id'] == favorite_movie["movie_id"]].iloc[0]["index"])
         favorite_movies_index.append(index[movies_df['id'] == favorite_movie["movie_id"]].tolist()[0])
-
-    print(favorite_movies_index)
 
     i = 0
     for favorite_movie in favorite_movies_index:
@@ -79,9 +74,9 @@ def combine_features(row):
         cast = ""
         director = ""
         genres = ""
-    #language = str(row["original_language_full"])
     combined_features = genres + " " + row["original_title"].lower() + " " + cast + " " + director + str(row["overview_short"]).lower()
     return combined_features
+
 
 def remove_stopwords(row):
     try:
@@ -89,39 +84,25 @@ def remove_stopwords(row):
         return overview_short
     except:
         return row["overview"]
-    #if row["original_language_full"] in cachedStopWords.keys():
-        #try:
-            #overview_short = ' '.join([word.replace(",", "").replace(".", "").lower() for word in row["overview"].split() if word.replace(",", "").replace(".", "").lower() not in cachedStopWords[row["original_language_full"]]][:15])
-            #return overview_short
-        #except:
-            #return row["overview"]
-    #else:
-        #return row["overview"]
 
+
+# Load movie dataset csv
 movies_df = pd.read_csv("movie_dataset.csv")
-movies_df['json'] = movies_df.apply(lambda x: x.to_json(), axis=1)
-index = movies_df.index
-#movies_df["original_language_full"] = movies_df["original_language"].apply(lambda x: languages.get(alpha2=str(x)).name.lower())
-
-#for language in movies_df["original_language_full"].drop_duplicates():
-    #try:
-        #cachedStopWords[language] = stopwords.words(language)
-        #if language == "english":
-           #print(cachedStopWords[language])
-    #except:
-        #continue
-
+# Add json, overview_short, combined_features columns
+movies_df["json"] = movies_df.apply(lambda x: x.to_json(), axis=1)
 movies_df["overview_short"] = movies_df.apply(remove_stopwords, axis=1)
-
 movies_df["combined_features"] = movies_df.apply(combine_features, axis=1)
-
+# Index structure with the first row id=135397 having 0 index
+index = movies_df.index
+# Sklearn count vectorizer that converts a collection of text documents to a matrix of token counts
 cv = CountVectorizer()
-
+# fit_transform learns the vocabulary dictionary and return document-term matrix
 count_matrix = cv.fit_transform(movies_df["combined_features"])
-
+# Compute cosine similarity between all samples in count_matrix
+# Returns 10722x10722 matrix that has 0-1 value, 1 on the main diagonal of matrix
 cosine_sim = cosine_similarity(count_matrix)
-print("COSINE_SIM")
-print(cosine_sim)
+gather_genres()
+
 
 # Create your views here.
 class MovieDetails(APIView):
