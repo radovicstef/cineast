@@ -37,7 +37,6 @@ class MovieCardComponent extends Component {
       this.props.id
     );
     isMovieLiked = isMovieLiked === "true";
-    console.log("Is movie liked: " + isMovieLiked + " id: " + this.props.id);
     this.setState(() => {
       return { loggedin: isLoggedIn, favorite: isMovieLiked };
     });

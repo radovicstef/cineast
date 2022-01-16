@@ -27,6 +27,9 @@ class CineastApp extends Component {
       activeHeaderSection: undefined,
       searchedMovies: []
     };
+    this.genre = "All";
+    this.rating = "All";
+    this.year = "All";
     this.finishLoading = this.finishLoading.bind(this);
     this.handleLoggedIn = this.handleLoggedIn.bind(this);
     this.checkIfLoggedIn = this.checkIfLoggedIn.bind(this);
@@ -34,6 +37,7 @@ class CineastApp extends Component {
     this.startLoading = this.startLoading.bind(this);
     this.activateHeaderSection = this.activateHeaderSection.bind(this);
     this.passSearchedMovies = this.passSearchedMovies.bind(this);
+    this.storeLastFilter = this.storeLastFilter.bind(this);
   }
   startLoading() {
     this.setState(() => {
@@ -51,6 +55,7 @@ class CineastApp extends Component {
     });
   }
   handleLogout() {
+    this.storeLastFilter("All", "All", "All");
     this.setState(() => {
       return { loggedin: false };
     });
@@ -73,6 +78,12 @@ class CineastApp extends Component {
     this.setState(() => {
       return {searchedMovies: movies}
     })
+  }
+  storeLastFilter(genre, rating, year){
+    this.genre = genre;
+    this.rating = rating;
+    this.year = year;
+    console.log("storeLastFilter(): " + this.genre + " " + this.rating + " " + this.year)
   }
   render() {
     return (
@@ -115,7 +126,7 @@ class CineastApp extends Component {
               />
               <AuthenticatedRoute
                 path="/explore/:page"
-                component={() => <ExploreComponent searchedMovies={this.state.searchedMovies} activeHeaderSection={this.state.activeHeaderSection} activateHeaderSection={this.activateHeaderSection}/>}
+                component={() => <ExploreComponent filter={[this.genre, this.rating, this.year]} searchedMovies={this.state.searchedMovies} activeHeaderSection={this.state.activeHeaderSection} activateHeaderSection={this.activateHeaderSection} storeLastFilter={this.storeLastFilter}/>}
               />
               <AuthenticatedRoute
                 path="/favorites"

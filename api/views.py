@@ -12,6 +12,7 @@ from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 import jwt, datetime
 import pandas as pd
+import numpy as np
 from api.utils import getUsername
 import json
 from sklearn.feature_extraction.text import CountVectorizer
@@ -23,10 +24,6 @@ from api.constants import API_KEY
 # Global variables
 genres_gathered = {}
 cachedStopWords = stopwords.words("english")
-similar_movies = []
-filtered_similar_movies = []
-sorted_similar_movies = []
-favorite_movies = []
 
 # Gather genres
 def gather_genres():
@@ -38,9 +35,8 @@ def gather_genres():
 
 
 def find_similar_movies(username):
-    global favorite_movies
+    user_model = User.objects.get(username=username)
     print("Finding similar movies...")
-    global similar_movies, sorted_similar_movies, filtered_similar_movies
     favorite_movies = list(FavoriteMovies.objects.filter(username=username).values("movie_id"))
 
     if(len(favorite_movies) == 0):
@@ -62,7 +58,13 @@ def find_similar_movies(username):
 
 
     sorted_similar_movies = sorted(similar_movies,key=lambda x:x[1],reverse=True)
-    filtered_similar_movies = [i[0] for i in sorted_similar_movies]
+    sorted_similar_movies_id = [i[0] for i in sorted_similar_movies]
+    sorted_similar_movies_id_json = json.dumps(sorted_similar_movies_id)
+    user_model.sorted_similar_movies_json = sorted_similar_movies_id_json
+    user_model.filtered_similar_movies_json = sorted_similar_movies_id_json
+    user_model.save()
+    print("haaaaajo")
+    print(sorted_similar_movies)
 
 
 def combine_features(row):
@@ -229,7 +231,8 @@ class LoginView(APIView):
         response.data = {
             "jwt": token
         }
-        find_similar_movies(username)
+        #if user.filtered_similar_movies_json == "[]":
+            #find_similar_movies(username)
         return response
 
 class GetFavoriteMovies(APIView):
@@ -314,6 +317,19 @@ class IsMovieLiked(APIView):
 
 class ExploreMovies(APIView):
     def get(self, request, page):
+        username = getUsername(request.COOKIES.get("jwt"))
+        user_model = User.objects.get(username=username)
+        
+        favorite_movies = list(FavoriteMovies.objects.filter(username=username).values("movie_id"))
+        favorite_movies_index = []
+        for favorite_movie in favorite_movies:
+            favorite_movies_index.append(index[movies_df['id'] == favorite_movie["movie_id"]].tolist()[0])
+        filtered_similar_movies = json.loads(user_model.filtered_similar_movies_json)
+        print(favorite_movies[0:10])
+        favorite_movies = list(set(favorite_movies_index).intersection(filtered_similar_movies))
+        print(favorite_movies[0:10])
+        print(filtered_similar_movies[0:10])
+
         index_begin = (page-1)*12 + len(favorite_movies)
         index_end = page*12 + len(favorite_movies)
         movies_json = []
@@ -331,11 +347,14 @@ class ExploreMovies(APIView):
 
 class FilterSortedMovies(APIView):
     def get(self, request, genre, rating, year):
-        global filtered_similar_movies
-        print("HEEEELO")
-        print(sorted_similar_movies[0:10])
-        filtered_similar_movies = [i[0] for i in sorted_similar_movies]
+        username = getUsername(request.COOKIES.get("jwt"))
+        user_model = User.objects.get(username=username)
+        sorted_similar_movies = json.loads(user_model.sorted_similar_movies_json)
         movies_query = movies_df
+        if(genre == "All" and rating == "All" and year == "All"):
+            user_model.filtered_similar_movies_json = user_model.sorted_similar_movies_json
+            user_model.save()
+            return JsonResponse("ok", safe=False)
         if(genre != "All"):
             movies_query = movies_query[movies_query["genres"].str.contains(genre, na=False)]
         if(rating != "All"):
@@ -354,15 +373,20 @@ class FilterSortedMovies(APIView):
                 movies_query = movies_query.query('release_year >= 2000 and release_year <= 2010')
             if(year == "2010-2021"):
                 movies_query = movies_query.query('release_year >= 2010 and release_year <= 2021')
-        movies_query = movies_query.index.tolist()
-        sorted_movies = [i[0] for i in sorted_similar_movies]
-        sorted_movies_set = set(sorted_movies)
-        movies_query_set = set(movies_query)
-        filtered_similar_movies = sorted(sorted_movies_set & movies_query_set, key=sorted_movies.index)
-        return JsonResponse(filtered_similar_movies, safe=False)
+        movies_query = [x for x in movies_query.index.tolist()]
+        filtered_similar_movies_final = sorted(set(sorted_similar_movies) & set(movies_query), key=sorted_similar_movies.index)
+        filtered_similar_movies_final_json = json.dumps(filtered_similar_movies_final)
+        user_model.filtered_similar_movies_json = filtered_similar_movies_final_json
+        user_model.save()
+        print("hellooooooooooooo")
+        print(movies_df[movies_df.index.isin(filtered_similar_movies_final[0:3])])
+        return JsonResponse(filtered_similar_movies_final, safe=False)
 
 class GetNumPages(APIView):
     def get(self, request):
+        username = getUsername(request.COOKIES.get("jwt"))
+        user_model = User.objects.get(username=username)
+        filtered_similar_movies = json.loads(user_model.filtered_similar_movies_json)
         return JsonResponse(int(len(filtered_similar_movies)/12), safe=False)
 
 
@@ -381,11 +405,15 @@ class SearchMovie(APIView):
         searched_movies_json = []
         for searched_movie in searched_movies_list:
             searched_movies_json.append(json.loads(searched_movie))
-        return JsonResponse(searched_movies_json, safe=False)
+        return JsonResponse("ok", safe=False)
 
 
 class LogoutView(APIView):
     def post(self, request):
+        username = getUsername(request.COOKIES.get("jwt"))
+        user_model = User.objects.get(username=username)
+        user_model.filtered_similar_movies_json = user_model.sorted_similar_movies_json
+        user_model.save()
         response = Response()
         response.delete_cookie("jwt")
         response.data = {

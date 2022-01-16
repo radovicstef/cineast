@@ -7,6 +7,9 @@ from django.contrib.auth.models import AbstractUser
 class User(AbstractUser):
     username = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=255)
+    filtered_similar_movies_json = models.TextField(default="[]")
+    sorted_similar_movies_json = models.TextField(default="[]")
+
 
     REQUIRED_FIELDS = []
 

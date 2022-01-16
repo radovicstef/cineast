@@ -31,12 +31,11 @@ class FilterComponent extends Component {
             onChange={this.changeSelectedFilter}
             className="filter-select"
             classes={{
-              icon: "filter-select",
-              underline: "filter-select"
+              icon: "filter-select"
             }}
           >
-            {this.props.values.map((value) => {
-              return <MenuItem value={value}>{value}</MenuItem>;
+            {this.props.values.map((value, id) => {
+              return <MenuItem key={id} value={value}>{value}</MenuItem>;
             })}
           </Select>
         </FormControl>
