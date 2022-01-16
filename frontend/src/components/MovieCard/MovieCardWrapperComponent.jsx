@@ -1,6 +1,6 @@
 import React, { Component } from "react";
+import { IP_ADDR, PORT } from "../../constants.js";
 import MovieCardComponent from "./MovieCardComponent.jsx";
-
 
 class MovieCardWrapperComponent extends Component {
   constructor(props) {
@@ -10,7 +10,7 @@ class MovieCardWrapperComponent extends Component {
     };
   }
   componentDidMount() {
-    fetch(`http://localhost:8000/api/movie_overview/${this.props.movie_id}/`)
+    fetch(`http://${IP_ADDR}:${PORT}/api/movie_overview/${this.props.movie_id}/`)
       .then((reply) => reply.json())
       .then((data) => {
         this.setState(() => {

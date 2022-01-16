@@ -10,6 +10,7 @@ import CastComponent from "./CastComponent.jsx";
 import AuthenticationService from "../Authentication/AuthenticationService";
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import ChartBudget from "./ChartBudget.jsx";
+import { IP_ADDR, PORT } from "../../constants";
 
 class MovieDetails extends Component {
   constructor(props) {
@@ -32,7 +33,7 @@ class MovieDetails extends Component {
     window.addEventListener("resize", this.handleResizeMovieDetails);
   }
   getMovieDetails() {
-    fetch(`http://localhost:8000/api/movie/${this.props.match.params.id}`)
+    fetch(`http://${IP_ADDR}:${PORT}/api/movie/${this.props.match.params.id}`)
       .then((reply) => reply.json())
       .then((reply) => {
         this.setState(() => {
@@ -60,7 +61,7 @@ class MovieDetails extends Component {
   }
   addToFavorites() {
     const data = { movie_id: this.props.match.params.id };
-    const request = new Request("http://localhost:8000/api/add_favorite", {
+    const request = new Request(`http://${IP_ADDR}:${PORT}/api/add_favorite`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -78,7 +79,7 @@ class MovieDetails extends Component {
   }
   removeFromFavorites() {
     fetch(
-      `http://localhost:8000/api/remove_favorite/${this.props.match.params.id}/`
+      `http://${IP_ADDR}:${PORT}/api/remove_favorite/${this.props.match.params.id}/`
     ).then((response) => {
       if (response.ok) {
         console.log("Removed favorite movie");

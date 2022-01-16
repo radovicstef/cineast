@@ -7,6 +7,7 @@ import "./MovieCardComponent.css";
 import MovieRatingComponent from "./MovieRatingComponent.jsx";
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import AuthenticationService from "../Authentication/AuthenticationService";
+import { IP_ADDR, PORT } from "../../constants.js";
 
 
 class MovieCardComponent extends Component {
@@ -43,7 +44,7 @@ class MovieCardComponent extends Component {
   }
   addToFavorites() {
     const data = { movie_id: this.props.id };
-    const request = new Request("http://localhost:8000/api/add_favorite", {
+    const request = new Request(`http://${IP_ADDR}:${PORT}/api/add_favorite`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -67,7 +68,7 @@ class MovieCardComponent extends Component {
   }
   removeFromFavorites() {
     fetch(
-      `http://localhost:8000/api/remove_favorite/${this.props.id}/`
+      `http://${IP_ADDR}:${PORT}/api/remove_favorite/${this.props.id}/`
     ).then((response) => {
       if (response.ok) {
         console.log("Removed favorite movie");

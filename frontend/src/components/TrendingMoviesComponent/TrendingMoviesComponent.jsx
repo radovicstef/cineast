@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import MovieCardComponent from "../MovieCard/MovieCardComponent.jsx";
 import Carousel from "react-material-ui-carousel";
+import { IP_ADDR, PORT } from "../../constants.js";
+
 
 class TrendingMoviesComponent extends Component {
   constructor(props) {
@@ -18,7 +20,7 @@ class TrendingMoviesComponent extends Component {
   }
   componentDidMount() {
     console.log("here");
-    fetch("http://localhost:8000/api/trending_movies")
+    fetch(`http://${IP_ADDR}:${PORT}/api/trending_movies`)
       .then((reply) => reply.json())
       .then((reply) => {
         this.setState(() => {

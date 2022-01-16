@@ -6,6 +6,8 @@ import SearchIcon from "@material-ui/icons/Search";
 import { InputAdornment } from "@material-ui/core";
 import "./HeaderComponent.css";
 import { TextField } from "@material-ui/core";
+import { IP_ADDR, PORT } from "../../constants";
+
 
 class HeaderComponent extends Component {
   constructor(props) {
@@ -18,7 +20,7 @@ class HeaderComponent extends Component {
   }
   onLogout() {
     this.props.startLoading();
-    const request = new Request("http://localhost:8000/api/logout", {
+    const request = new Request(`http://${IP_ADDR}:${PORT}/api/logout`, {
       method: "POST",
     });
     fetch(request).then((response) => {
@@ -33,7 +35,7 @@ class HeaderComponent extends Component {
       this.props.passSearchedMovies([])
     } else {
       console.log(event.target.value);
-      fetch(`http://localhost:8000/api/search/${event.target.value}`)
+      fetch(`http://${IP_ADDR}:${PORT}/api/search/${event.target.value}`)
         .then((reply) => reply.json())
         .then((data) => {
           this.props.passSearchedMovies(data);

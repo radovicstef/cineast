@@ -25,7 +25,7 @@ from api.constants import API_KEY
 genres_gathered = {}
 cachedStopWords = stopwords.words("english")
 
-# Gather genres
+# Gathers genres from the TMDB API and stores to genres_gathered, so that the names are accessable by the genre id
 def gather_genres():
     global genres_gathered
     resp = requests.get(f"https://api.themoviedb.org/3/genre/movie/list?api_key={API_KEY}")
@@ -34,39 +34,7 @@ def gather_genres():
         genres_gathered[genre["id"]] = genre["name"]
 
 
-def find_similar_movies(username):
-    user_model = User.objects.get(username=username)
-    print("Finding similar movies...")
-    favorite_movies = list(FavoriteMovies.objects.filter(username=username).values("movie_id"))
-
-    if(len(favorite_movies) == 0):
-        pass
-
-    favorite_movies_index = []
-    for favorite_movie in favorite_movies:
-        favorite_movies_index.append(index[movies_df['id'] == favorite_movie["movie_id"]].tolist()[0])
-
-    i = 0
-    for favorite_movie in favorite_movies_index:
-        if i == 0:
-            i=1
-            similar_movies =  list(enumerate(cosine_sim[favorite_movie]))
-        else:
-            new_similarity = list(enumerate(cosine_sim[favorite_movie]))
-            for i in range(0, len(similar_movies)):
-                similar_movies[i] = (similar_movies[i][0], similar_movies[i][1] + new_similarity[i][1])
-
-
-    sorted_similar_movies = sorted(similar_movies,key=lambda x:x[1],reverse=True)
-    sorted_similar_movies_id = [i[0] for i in sorted_similar_movies]
-    sorted_similar_movies_id_json = json.dumps(sorted_similar_movies_id)
-    user_model.sorted_similar_movies_json = sorted_similar_movies_id_json
-    user_model.filtered_similar_movies_json = sorted_similar_movies_id_json
-    user_model.save()
-    print("haaaaajo")
-    print(sorted_similar_movies)
-
-
+# Takes row as a prameter and returnes combined_features string that will be used in calculating content similarity
 def combine_features(row):
     try:
         cast = row["cast"].replace(" ", "").replace("|", " ").lower()
@@ -88,22 +56,73 @@ def remove_stopwords(row):
         return row["overview"]
 
 
-# Load movie dataset csv
+# Load movie dataset csv file
 movies_df = pd.read_csv("movie_dataset.csv")
+
 # Add json, overview_short, combined_features columns
 movies_df["json"] = movies_df.apply(lambda x: x.to_json(), axis=1)
 movies_df["overview_short"] = movies_df.apply(remove_stopwords, axis=1)
 movies_df["combined_features"] = movies_df.apply(combine_features, axis=1)
+
 # Index structure with the first row id=135397 having 0 index
 index = movies_df.index
+
 # Sklearn count vectorizer that converts a collection of text documents to a matrix of token counts
 cv = CountVectorizer()
-# fit_transform learns the vocabulary dictionary and return document-term matrix
+
+# fit_transform learns the vocabulary dictionary and returns document-term matrix
 count_matrix = cv.fit_transform(movies_df["combined_features"])
+
 # Compute cosine similarity between all samples in count_matrix
 # Returns 10722x10722 matrix that has 0-1 value, 1 on the main diagonal of matrix
 cosine_sim = cosine_similarity(count_matrix)
 gather_genres()
+
+
+# This method is called after the favorite movies list is updated
+# It sorts the list of movie suggestions by content similarity
+# It uses cosine_sim matrix with the movie-to-movie similarity_index for each pair of the movies
+def find_similar_movies(username):
+    user_model = User.objects.get(username=username)
+   
+    favorite_movies = list(FavoriteMovies.objects.filter(username=username).values("movie_id"))  # the list of dictionaries {"movies_id": id_value}
+
+    # if user has empty list of favorite movies, no suggestion is retur
+    if(len(favorite_movies) == 0):
+        pass
+
+    favorite_movies_index = []  # the array of indexes of user's favorite movies
+    for favorite_movie in favorite_movies:
+        favorite_movies_index.append(index[movies_df['id'] == favorite_movie["movie_id"]].tolist()[0])
+
+    i = 0
+    similar_movies = list()
+    for favorite_movie in favorite_movies_index:
+        if i == 0:  # creates similar_movies list of tuples (dataset_index, similarity_index [value 0-1])
+            i=1
+            similar_movies =  list(enumerate(cosine_sim[favorite_movie]))
+            print("Hajojojojojiijijijijijiji")
+            print(cosine_sim[favorite_movie])
+            print(similar_movies[0:10])
+        # if the favorite movie is not the first one from the list, 
+        # create a new_similarity list of similar movies, based on the current favorite_movie
+        # sum the similarity_index value of the similar_movies and new_similarity lists
+        else:  
+            new_similarity = list(enumerate(cosine_sim[favorite_movie]))
+            for i in range(0, len(similar_movies)):
+                similar_movies[i] = (similar_movies[i][0], similar_movies[i][1] + new_similarity[i][1])
+
+    # sorted_similar_movies is the sorted list similar_movies based on the similarity_index value
+    sorted_similar_movies = sorted(similar_movies,key=lambda x:x[1],reverse=True)
+
+    # sorted_similar_movies_index creates array of dataframe_indexes out of tuple (dataframe_index, similarity_index)
+    sorted_similar_movies_index = [i[0] for i in sorted_similar_movies]
+    sorted_similar_movies_index_json = json.dumps(sorted_similar_movies_index)
+
+    # initially sorted_similar_movies_json and filtered_similar_movies_json are the same, since no filter is applied
+    user_model.sorted_similar_movies_json = sorted_similar_movies_index_json
+    user_model.filtered_similar_movies_json = sorted_similar_movies_index_json
+    user_model.save()
 
 
 # Create your views here.
@@ -204,6 +223,7 @@ def TrendingMoviesView(request):
         trending_movies.append(trending_movie)
     return JsonResponse(trending_movies, safe=False)
 
+
 class RegisterView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
@@ -211,29 +231,34 @@ class RegisterView(APIView):
         serializer.save()
         return JsonResponse(serializer.data)
 
+
 class LoginView(APIView):
     def post(self, request):
         username = request.data["username"]
         password = request.data["password"]
-        user = User.objects.filter(username=username).first()
-        if user is None:
+        user_model = User.objects.filter(username=username).first()
+
+        if user_model is None:
             raise AuthenticationFailed("User cannot be found!")
-        #comparing hashed password
-        if not user.check_password(password):
+
+        # Comparing hashed password
+        if not user_model.check_password(password):
             raise AuthenticationFailed("Incorrect password!")
+
+        # Payload that will be hashed and stored to JWT token    
         payload = {
-            "id": user.id,
-            "username": user.username
+            "id": user_model.id,
+            "username": user_model.username
         }
         token = jwt.encode(payload, "secret", algorithm="HS256").decode("utf-8")
+
         response = Response()
         response.set_cookie(key="jwt", value=token, httponly=True)
         response.data = {
             "jwt": token
         }
-        #if user.filtered_similar_movies_json == "[]":
-            #find_similar_movies(username)
         return response
+
 
 class GetFavoriteMovies(APIView):
     def get(self, request):
@@ -405,7 +430,7 @@ class SearchMovie(APIView):
         searched_movies_json = []
         for searched_movie in searched_movies_list:
             searched_movies_json.append(json.loads(searched_movie))
-        return JsonResponse("ok", safe=False)
+        return JsonResponse(searched_movies_json, safe=False)
 
 
 class LogoutView(APIView):

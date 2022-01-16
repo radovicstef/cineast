@@ -4,6 +4,8 @@ import "./RegisterComponent.css";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
+import { IP_ADDR, PORT } from "../../constants";
+
 
 class RegisterComponent extends Component {
   constructor(props) {
@@ -34,7 +36,7 @@ class RegisterComponent extends Component {
       username: this.state.username,
       password: this.state.password,
     };
-    const request = new Request("http://localhost:8000/api/register", {
+    const request = new Request(`http://${IP_ADDR}:${PORT}/api/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

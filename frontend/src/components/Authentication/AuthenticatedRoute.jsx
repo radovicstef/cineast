@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { Redirect, Route } from "react-router";
 import AuthenticationService from "./AuthenticationService";
 import ProcessingComponent from "../ProcessingComponent/ProcessingComponent.jsx";
+import { IP_ADDR, PORT } from "../../constants";
+
 
 class AuthenticatedRoute extends Component {
   constructor(props) {
@@ -11,7 +13,7 @@ class AuthenticatedRoute extends Component {
     };
   }
   componentDidMount() {
-    fetch("http://localhost:8000/api/user")
+    fetch(`http://${IP_ADDR}:${PORT}/api/user`)
       .then((response) => {
         if (!response.ok) {
           this.setState(() => {

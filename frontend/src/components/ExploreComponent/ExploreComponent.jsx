@@ -8,23 +8,38 @@ import MovieCardWrapperComponent from "../MovieCard/MovieCardWrapperComponent.js
 import explore from "../../../static/images/explore.jpg";
 import FilterComponent from "../FilterComponent/FilterComponent.jsx";
 import TuneIcon from "@material-ui/icons/Tune";
-import { TimeScale } from "chart.js";
+
+import processingGif from "../../../static/images/processing.gif";
+import { IP_ADDR, PORT } from "../../constants";
 
 class ExploreComponent extends Component {
   isMounted = false;
   constructor(props) {
     super(props);
     this.state = {
+      imageReady: false,
+      loading: this.props.searchedMovies.length !== 0 ? false : true,
       movies:
         this.props.searchedMovies.length !== 0 ? this.props.searchedMovies : [],
       searching: this.props.searchedMovies.length !== 0 ? true : false,
       numPages: 0,
       pageNumber: 1,
-      filtered: false
     };
-    this.genre = "All";
-    this.rating = "All";
-    this.year = "All";
+
+    this.genre = this.props.filter[0];
+    this.rating = this.props.filter[1];
+    this.year = this.props.filter[2];
+
+    const image = new Image();
+    image.onload = () => {
+      this.setState(() => {
+        return {
+          imageReady: true,
+        };
+      });
+    };
+    image.src = processingGif;
+
     this.filterMovies = this.filterMovies.bind(this);
     this.handleChangePage = this.handleChangePage.bind(this);
     this.getNumOfPages = this.getNumOfPages.bind(this);
@@ -35,22 +50,14 @@ class ExploreComponent extends Component {
   }
   componentDidMount() {
     this.getNumOfPages();
-    this.genre = this.props.filter[0];
-    this.rating = this.props.filter[1];
-    this.year = this.props.filter[2];
-    console.log("componentDidMount(): " + this.props.filter[0] + " " + this.props.filter[1] + " " + this.props.filter[2]);
+    this.filterMovies(this.props.match.params.page);
     if (this.props.activeHeaderSection !== "explore") {
       this.props.activateHeaderSection("explore");
     }
     this.isMounted = true;
-    this.loadMovies(this.props.match.params.page);
   }
   componentWillUnmount() {
-    this.props.storeLastFilter(
-      this.genre,
-      this.rating,
-      this.year
-    );
+    this.props.storeLastFilter(this.genre, this.rating, this.year);
     if (this.props.activeHeaderSection !== undefined) {
       this.props.activateHeaderSection(undefined);
     }
@@ -65,36 +72,19 @@ class ExploreComponent extends Component {
     this.props.history.push(`/explore/${pageNumber}`);
     this.loadMovies(pageNumber);
   }
-  filterMovies() {
-    console.log(
-      this.genre + " " + this.year + " " + this.rating
-    );
-    if (
-      !(
-        this.genre === "All" &&
-        this.year == "All" &&
-        this.rating == "All"
-      )
-    ) {
-      this.setState(() => {
-        return { filtered: true };
-      });
-    } else {
-      this.setState(() => {
-        return { filtered: false };
-      });
-    }
+  filterMovies(pageNumber=1) {
+    console.log("filterMovies(): " + this.genre + " " + this.year + " " + this.rating);
+    console.log("filterMOvies() - pageNumber: " + pageNumber);
     fetch(
-      `http://localhost:8000/api/filter/${this.genre}/${this.rating}/${this.year}`
+      `http://${IP_ADDR}:${PORT}/api/filter/${this.genre}/${this.rating}/${this.year}`
     )
       .then((resp) => resp.json())
       .then((data) => {
-        this.loadMovies(1);
-        this.handleChangePage({ selected: 0 });
+        this.handleChangePage({ selected: pageNumber-1 });
       });
   }
   getNumOfPages() {
-    fetch("http://localhost:8000/api/explore/pages")
+    fetch(`http://${IP_ADDR}:${PORT}/api/explore/pages`)
       .then((resp) => resp.json())
       .then((data) =>
         this.setState(() => {
@@ -103,32 +93,52 @@ class ExploreComponent extends Component {
       );
   }
   loadMovies(pageNumber) {
+    console.log("loadMovies() - pageNumber: " + pageNumber);
     if (this.props.searchedMovies.length === 0) {
-      fetch(`http://localhost:8000/api/explore/${pageNumber}`)
+      this.setState(() => {
+        return {
+          loading: true,
+        };
+      });
+      fetch(`http://${IP_ADDR}:${PORT}/api/explore/${pageNumber}`)
         .then((resp) => resp.json())
         .then((data) => {
           if (this.isMounted) {
             this.setState(() => {
-              return { movies: data };
+              return { movies: data, loading: false };
             });
           }
+        })
+        .catch((error) => {
+          this.setState(() => {
+            return {
+              movies: [],
+              loading: false,
+            };
+          });
         });
     } //this.handleChangePage({ selected: 0 });
     this.getNumOfPages();
   }
   changeGenre(genreValue) {
     this.genre = genreValue;
+    this.props.storeLastFilter(this.genre, this.rating, this.year);
   }
   changeYear(yearValue) {
     this.year = yearValue;
+    this.props.storeLastFilter(this.genre, this.rating, this.year);
   }
   changeRating(ratingValue) {
     this.rating = ratingValue;
+    this.props.storeLastFilter(this.genre, this.rating, this.year);
   }
   render() {
     return (
       <div>
-        {(this.state.movies.length !== 0 || this.state.filtered) && (
+        {this.state.searching && (
+          <div style={{ width: "100%", paddingBottom: "2.5rem" }}></div>
+        )}
+        {!this.state.searching && this.state.movies.length !== 0 && (
           <div
             className="filter"
             style={{
@@ -188,7 +198,7 @@ class ExploreComponent extends Component {
               ]}
               default={this.props.filter[2]}
             />
-            <button onClick={this.filterMovies} className="btn btn-secondary">
+            <button onClick={() => {this.filterMovies(1)}} className="btn btn-secondary">
               <TuneIcon />
             </button>
           </div>
@@ -201,7 +211,7 @@ class ExploreComponent extends Component {
                   return (
                     <div className="col" key={movie.id}>
                       <MovieCardWrapperComponent
-                        loadMovies={this.loadMovies}
+                        loadMovies={this.filterMovies}
                         pageNumber={this.state.pageNumber}
                         movie_id={movie.id}
                       />
@@ -211,13 +221,25 @@ class ExploreComponent extends Component {
               </div>
             </div>
           )}
-          {this.state.movies.length === 0 && (
+          {this.state.loading && !this.state.imageReady && (
+            <div style={{ width: "100%", height: "90%" }}></div>
+          )}
+          {this.state.loading && this.state.imageReady && (
+            <div style={{ padding: "6rem", paddingBottom: "7.5rem" }}>
+              <img
+                src={processingGif}
+                style={{ width: "20rem" }}
+                alt="processing..."
+              />
+            </div>
+          )}
+          {!this.state.loading && this.state.movies.length === 0 && (
             <div>
               <img style={{ marginTop: "3rem", width: "50%" }} src={explore} />
               <div className="start-searching" style={{ marginBottom: "3rem" }}>
-                {!this.state.filtered &&
+                {!this.state.searching &&
                   "Start searching favorite movies to explore suggestions..."}
-                {this.state.filtered && "No movie found..."}
+                {this.state.searching && "No movie found..."}
               </div>
             </div>
           )}

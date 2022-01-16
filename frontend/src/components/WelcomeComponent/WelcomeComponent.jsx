@@ -4,6 +4,8 @@ import { withRouter } from "react-router";
 
 import "./WelcomeComponent.css";
 import welcomeimage from "../../../static/images/welcome.jpg";
+import { IP_ADDR, PORT } from "../../constants";
+
 
 class WelcomeComponent extends Component {
   constructor(props) {
@@ -13,7 +15,7 @@ class WelcomeComponent extends Component {
     }
   }
   componentDidMount() {
-      fetch("http://localhost:8000/api/user")
+      fetch(`http://${IP_ADDR}:${PORT}/api/user`)
       .then(reply => reply.json())
       .then(data => {
           this.setState(() => {

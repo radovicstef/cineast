@@ -3,6 +3,8 @@ import React, { Component } from "react";
 import "./LoginComponent.css";
 import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import VpnKeyIcon from "@material-ui/icons/VpnKey";
+import { IP_ADDR, PORT } from "../../constants";
+
 
 class LoginComponent extends Component {
   constructor(props) {
@@ -21,7 +23,7 @@ class LoginComponent extends Component {
       username: this.state.username,
       password: this.state.password,
     };
-    const request = new Request("http://localhost:8000/api/login", {
+    const request = new Request(`http://${IP_ADDR}:${PORT}/api/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
