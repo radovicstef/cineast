@@ -63,18 +63,20 @@ class ExploreComponent extends Component {
     }
     this.isMounted = false;
   }
+  //handleChangePage(data) is automatically triggered by changing page using page pagination bar
+  //data will be passed as selected page number - 1 in form {selected: pageNumber-1}
   handleChangePage(data) {
     const pageNumber = data.selected + 1;
     this.setState(() => {
       return { pageNumber: pageNumber };
     });
-    console.log("handleChangePage");
     this.props.history.push(`/explore/${pageNumber}`);
+    //loads movies for specified page
     this.loadMovies(pageNumber);
   }
+  //Filters the movies based on the current filter and calls handleChangePage(pageNumber-1) method
+  //By default, pageNumber is 1
   filterMovies(pageNumber=1) {
-    console.log("filterMovies(): " + this.genre + " " + this.year + " " + this.rating);
-    console.log("filterMOvies() - pageNumber: " + pageNumber);
     fetch(
       `http://${IP_ADDR}:${PORT}/api/filter/${this.genre}/${this.rating}/${this.year}`
     )
@@ -93,7 +95,7 @@ class ExploreComponent extends Component {
       );
   }
   loadMovies(pageNumber) {
-    console.log("loadMovies() - pageNumber: " + pageNumber);
+    //if searching is active movies will not be loaded
     if (this.props.searchedMovies.length === 0) {
       this.setState(() => {
         return {

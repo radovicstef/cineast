@@ -48,6 +48,7 @@ def combine_features(row):
     return combined_features
 
 
+# Removes stopwords from the overview_short, so that it only contains keywords
 def remove_stopwords(row):
     try:
         overview_short = ' '.join([word.replace(",", "").replace(".", "").replace('"', "").lower() for word in row["overview"].split() if word.replace(",", "").replace(".", "").lower() not in cachedStopWords])      
@@ -126,6 +127,8 @@ def find_similar_movies(username):
 
 
 # Create your views here.
+
+# Get movie details, based on the movie id
 class MovieDetails(APIView):
     def get(self, request, movie_id):
         resp = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={API_KEY}&append_to_response=credits")
@@ -166,6 +169,7 @@ class MovieDetails(APIView):
             raise Http404
 
 
+# Get movie short overview, based on the movie id
 class MovieOverview(APIView):
     def get(self, request, movie_id):
         resp = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={API_KEY}")
@@ -189,6 +193,8 @@ class MovieOverview(APIView):
         else:
             raise Http404
 
+
+# Get trending movies from TMDB API
 @api_view()
 def TrendingMoviesView(request):
     resp = requests.get(f"https://api.themoviedb.org/3/trending/movie/week?api_key={API_KEY}")
@@ -260,12 +266,15 @@ class LoginView(APIView):
         return response
 
 
+# Get user's favorite movies
 class GetFavoriteMovies(APIView):
     def get(self, request):
         username = getUsername(request.COOKIES.get("jwt"))
         favorite_movies = list(FavoriteMovies.objects.filter(username=username).values("movie_id"))
         return JsonResponse(favorite_movies, safe=False)
 
+
+# Add favorite movie and updats the sorted similar movies list by calling find_similar_movies(username)
 class AddFavorite(APIView):
     def post(self, request):
         token = request.COOKIES.get("jwt")
@@ -291,6 +300,8 @@ class AddFavorite(APIView):
         }
         return response
 
+
+# Remove favorite movie and update the sorted similar movies list by calling find_similar_movies(username)
 class RemoveFavorite(APIView):
     def get(self, request, movie_id):
         username = getUsername(request.COOKIES.get("jwt"))
@@ -305,6 +316,8 @@ class RemoveFavorite(APIView):
             raise PermissionDenied() 
         return response
 
+
+# Get if the user is authenticated
 class UserView(APIView):
     def get(self, request):
         token = request.COOKIES.get("jwt")
@@ -319,6 +332,7 @@ class UserView(APIView):
         return Response(user_serialized.data)
 
 
+# Get if movie is liked, based on the movie id
 class IsMovieLiked(APIView):
     def get(self, request, movie_id):
         token = request.COOKIES.get("jwt")
@@ -340,27 +354,26 @@ class IsMovieLiked(APIView):
             }
         return response
 
+
+# Get 12 movies that should be displayed, based on the catalog page number 
 class ExploreMovies(APIView):
     def get(self, request, page):
         username = getUsername(request.COOKIES.get("jwt"))
         user_model = User.objects.get(username=username)
-        
+        filtered_similar_movies = json.loads(user_model.filtered_similar_movies_json)
         favorite_movies = list(FavoriteMovies.objects.filter(username=username).values("movie_id"))
+       
         favorite_movies_index = []
         for favorite_movie in favorite_movies:
             favorite_movies_index.append(index[movies_df['id'] == favorite_movie["movie_id"]].tolist()[0])
-        filtered_similar_movies = json.loads(user_model.filtered_similar_movies_json)
-        print(favorite_movies[0:10])
-        favorite_movies = list(set(favorite_movies_index).intersection(filtered_similar_movies))
-        print(favorite_movies[0:10])
-        print(filtered_similar_movies[0:10])
 
+        # favorite_movies is a list of favorites movies that is in filtered_similar_movies list
+        favorite_movies = list(set(favorite_movies_index).intersection(filtered_similar_movies))
+
+        # favorite movies should not be displayed (they are in the sorted list of similar movies)
         index_begin = (page-1)*12 + len(favorite_movies)
         index_end = page*12 + len(favorite_movies)
         movies_json = []
-        
-        #for movie_df in movies_df["json"][index_begin:index_end]:
-            #movies_json.append(json.loads(movie_df))
 
         for i in range(index_begin, index_end):
             try:
@@ -370,12 +383,16 @@ class ExploreMovies(APIView):
 
         return JsonResponse(movies_json, safe=False)
 
+
+# Filter the user's sorted similar movie list, based on the passed filters
 class FilterSortedMovies(APIView):
     def get(self, request, genre, rating, year):
         username = getUsername(request.COOKIES.get("jwt"))
         user_model = User.objects.get(username=username)
         sorted_similar_movies = json.loads(user_model.sorted_similar_movies_json)
+
         movies_query = movies_df
+
         if(genre == "All" and rating == "All" and year == "All"):
             user_model.filtered_similar_movies_json = user_model.sorted_similar_movies_json
             user_model.save()
@@ -398,15 +415,19 @@ class FilterSortedMovies(APIView):
                 movies_query = movies_query.query('release_year >= 2000 and release_year <= 2010')
             if(year == "2010-2021"):
                 movies_query = movies_query.query('release_year >= 2010 and release_year <= 2021')
+        
         movies_query = [x for x in movies_query.index.tolist()]
+        # filtered_similar_movies_final stores only filtered movies from movies_query, in the same order as sorted_similar_movies
         filtered_similar_movies_final = sorted(set(sorted_similar_movies) & set(movies_query), key=sorted_similar_movies.index)
         filtered_similar_movies_final_json = json.dumps(filtered_similar_movies_final)
+        
         user_model.filtered_similar_movies_json = filtered_similar_movies_final_json
         user_model.save()
-        print("hellooooooooooooo")
-        print(movies_df[movies_df.index.isin(filtered_similar_movies_final[0:3])])
-        return JsonResponse(filtered_similar_movies_final, safe=False)
 
+        return JsonResponse("ok", safe=False)
+
+
+# Get number of pages of the catalog, based on the number of movies
 class GetNumPages(APIView):
     def get(self, request):
         username = getUsername(request.COOKIES.get("jwt"))
@@ -415,21 +436,31 @@ class GetNumPages(APIView):
         return JsonResponse(int(len(filtered_similar_movies)/12), safe=False)
 
 
+# Get list of movie suggestions based on the search input
 class SearchMovie(APIView):
     def get(self,request, movie):
+        # searched_movies_same contains exact matches
         searched_movies_same = movies_df[movies_df["original_title"].str.lower() == movie.lower()]
+        
+        # searched_movies contains matches
         searched_movies = movies_df[movies_df["original_title"].str.contains(movie, na=False, case=False)]
+        
         searched_movies_list = searched_movies["json"].tolist()
         searched_movies_same_list = searched_movies_same["json"].tolist()
+
         for movie in searched_movies_same["id"].tolist():
             if movie in searched_movies["id"].tolist()[:3]:
                 searched_movies_same_list = []
                 break
+
+        # searched_movies_list should be dividable by 3 to suit UI, it should contain all the exact matches and optionally some matches
         searched_movies_same_length = len(searched_movies_same_list) if len(searched_movies_same_list)!=0 else 1
         searched_movies_list = searched_movies_same_list + searched_movies_list[0:3*searched_movies_same_length - len(searched_movies_same_list)]
+        
         searched_movies_json = []
         for searched_movie in searched_movies_list:
             searched_movies_json.append(json.loads(searched_movie))
+
         return JsonResponse(searched_movies_json, safe=False)
 
 
@@ -437,6 +468,7 @@ class LogoutView(APIView):
     def post(self, request):
         username = getUsername(request.COOKIES.get("jwt"))
         user_model = User.objects.get(username=username)
+        # Logging out will undo filtering on sorted similar movies in the database
         user_model.filtered_similar_movies_json = user_model.sorted_similar_movies_json
         user_model.save()
         response = Response()
