@@ -66,6 +66,7 @@ class ExploreComponent extends Component {
   //handleChangePage(data) is automatically triggered by changing page using page pagination bar
   //data will be passed as selected page number - 1 in form {selected: pageNumber-1}
   handleChangePage(data) {
+    window.scrollTo(0, 0);
     const pageNumber = data.selected + 1;
     this.setState(() => {
       return { pageNumber: pageNumber };
