@@ -102,9 +102,6 @@ def find_similar_movies(username):
         if i == 0:  # creates similar_movies list of tuples (dataset_index, similarity_index [value 0-1])
             i=1
             similar_movies =  list(enumerate(cosine_sim[favorite_movie]))
-            print("Hajojojojojiijijijijijiji")
-            print(cosine_sim[favorite_movie])
-            print(similar_movies[0:10])
         # if the favorite movie is not the first one from the list, 
         # create a new_similarity list of similar movies, based on the current favorite_movie
         # sum the similarity_index value of the similar_movies and new_similarity lists
@@ -218,7 +215,6 @@ def TrendingMoviesView(request):
             if(genre_id in genres_gathered):
                 genre_names.append(genres_gathered[genre_id])
             else:
-                print(genre_id)
                 genre_resp = requests.get("https://api.themoviedb.org/3/genre/{}?api_key={API_KEY}".format(genre_id))
                 genre_respJson = genre_resp.json()
                 id = genre_respJson["id"]
