@@ -5,7 +5,6 @@ import AccountCircleIcon from "@material-ui/icons/AccountCircle";
 import VpnKeyIcon from "@material-ui/icons/VpnKey";
 import { IP_ADDR, PORT } from "../../constants";
 
-
 class LoginComponent extends Component {
   constructor(props) {
     super(props);
@@ -18,7 +17,8 @@ class LoginComponent extends Component {
     this.submitLogin = this.submitLogin.bind(this);
     this.handleChangeInput = this.handleChangeInput.bind(this);
   }
-  submitLogin() {
+  submitLogin(e) {
+    e.preventDefault();
     const data = {
       username: this.state.username,
       password: this.state.password,
@@ -62,115 +62,118 @@ class LoginComponent extends Component {
           }}
         ></div>
         <section className="vh-100">
-          <div className="container py-5 h-100">
-            <div className="row d-flex justify-content-center align-items-center h-100">
-              <div className="col-12 col-md-8 col-lg-6 col-xl-5">
-                <div
-                  className="card"
-                  style={{
-                    borderRadius: "1rem",
-                    color: "#182D3A",
-                    backgroundColor: "rgba(255,255,255,0.5)",
-                  }}
-                >
-                  <div className="card-body p-5 text-center">
+          <form onSubmit={this.submitLogin}>
+            <div className="container py-5 h-100">
+              <div className="row d-flex justify-content-center align-items-center h-100">
+                <div className="col-12 col-md-8 col-lg-6 col-xl-5">
+                  <div
+                    className="card"
+                    style={{
+                      borderRadius: "1rem",
+                      color: "#182D3A",
+                      backgroundColor: "rgba(255,255,255,0.5)",
+                    }}
+                  >
+                    <div className="card-body p-5 text-center">
+                      <div style={{ marginBottom: "2rem" }}>
+                        <p style={{ fontSize: "2rem", fontWeight: "bolder" }}>
+                          CINEAST
+                        </p>
+                      </div>
+                      <div
+                        className="input-group"
+                        style={{ marginBottom: "1rem" }}
+                      >
+                        <div className="input-group-prepend">
+                          <span
+                            className="input-group-text"
+                            id="inputGroupPrepend"
+                          >
+                            <AccountCircleIcon color="action" />
+                          </span>
+                        </div>
+                        <input
+                          onFocus={() => {
+                            this.setState(() => {
+                              return { hasLoginFailed: false };
+                            });
+                          }}
+                          type="text"
+                          className="form-control"
+                          id="validationCustomUsername"
+                          placeholder="Username"
+                          name="username"
+                          value={this.state.username}
+                          aria-describedby="inputGroupPrepend"
+                          onChange={this.handleChangeInput}
+                          required
+                        />
+                        <div className="invalid-feedback">
+                          Please choose a username.
+                        </div>
+                      </div>
+                      <div className="input-group">
+                        <div className="input-group-prepend">
+                          <span
+                            className="input-group-text"
+                            id="inputGroupPrepend"
+                          >
+                            <VpnKeyIcon color="action" />
+                          </span>
+                        </div>
+                        <input
+                          onFocus={() => {
+                            this.setState(() => {
+                              return { hasLoginFailed: false };
+                            });
+                          }}
+                          type="password"
+                          className="form-control"
+                          id="validationCustomUsername"
+                          name="password"
+                          placeholder="Password"
+                          value={this.state.password}
+                          aria-describedby="inputGroupPrepend"
+                          onChange={this.handleChangeInput}
+                          required
+                        />
+                        <div className="invalid-feedback">
+                          Please choose a password.
+                        </div>
+                      </div>
+                    </div>
+                    {this.state.hasLoginFailed && (
+                      <div className="alert alert-danger">
+                        Invalid username/password or this username already
+                        taken!
+                      </div>
+                    )}
                     <div style={{ marginBottom: "2rem" }}>
-                      <p style={{ fontSize: "2rem", fontWeight: "bolder" }}>
-                        CINEAST
+                      <button
+                        onClick={this.submitLogin}
+                        className="btn"
+                        style={{
+                          backgroundColor: "#182D3A",
+                          color: "white",
+                          width: "80%",
+                        }}
+                      >
+                        Login
+                      </button>
+                    </div>
+                    <div style={{ marginBottom: "1rem" }}>
+                      <p className="mb-0">
+                        Don't have an account?{" "}
+                        <a href="/register" id="signUp">
+                          Sign Up
+                        </a>
                       </p>
                     </div>
-                    <div
-                      className="input-group"
-                      style={{ marginBottom: "1rem" }}
-                    >
-                      <div className="input-group-prepend">
-                        <span
-                          className="input-group-text"
-                          id="inputGroupPrepend"
-                        >
-                          <AccountCircleIcon color="action" />
-                        </span>
-                      </div>
-                      <input
-                        onFocus={() => {
-                          this.setState(() => {
-                            return { hasLoginFailed: false };
-                          });
-                        }}
-                        type="text"
-                        className="form-control"
-                        id="validationCustomUsername"
-                        placeholder="Username"
-                        name="username"
-                        value={this.state.username}
-                        aria-describedby="inputGroupPrepend"
-                        onChange={this.handleChangeInput}
-                        required
-                      />
-                      <div className="invalid-feedback">
-                        Please choose a username.
-                      </div>
-                    </div>
-                    <div className="input-group">
-                      <div className="input-group-prepend">
-                        <span
-                          className="input-group-text"
-                          id="inputGroupPrepend"
-                        >
-                          <VpnKeyIcon color="action" />
-                        </span>
-                      </div>
-                      <input
-                        onFocus={() => {
-                          this.setState(() => {
-                            return { hasLoginFailed: false };
-                          });
-                        }}
-                        type="password"
-                        className="form-control"
-                        id="validationCustomUsername"
-                        name="password"
-                        placeholder="Password"
-                        value={this.state.password}
-                        aria-describedby="inputGroupPrepend"
-                        onChange={this.handleChangeInput}
-                        required
-                      />
-                      <div className="invalid-feedback">
-                        Please choose a password.
-                      </div>
-                    </div>
-                  </div>
-                  {this.state.hasLoginFailed && (
-                    <div className="alert alert-danger">
-                      Invalid username/password or this username already taken!
-                    </div>
-                  )}
-                  <div style={{ marginBottom: "2rem" }}>
-                    <button
-                      onClick={this.submitLogin}
-                      className="btn"
-                      style={{
-                        backgroundColor: "#182D3A",
-                        color: "white",
-                        width: "80%",
-                      }}
-                    >
-                      Login
-                    </button>
-                  </div>
-                  <div style={{ marginBottom: "1rem" }}>
-                    <p className="mb-0">
-                      Don't have an account?{" "}
-                      <a href="/register" id="signUp">
-                        Sign Up
-                      </a>
-                    </p>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          </form>
         </section>
       </div>
     );
