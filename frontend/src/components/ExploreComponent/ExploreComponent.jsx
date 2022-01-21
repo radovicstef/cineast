@@ -228,7 +228,7 @@ class ExploreComponent extends Component {
             <div style={{ width: "100%", height: "90%" }}></div>
           )}
           {this.state.loading && this.state.imageReady && (
-            <div style={{ padding: "6rem", paddingBottom: "7.5rem" }}>
+            <div style={{ padding: "7rem", width: "100%", height: "90%" }}>
               <img
                 src={processingGif}
                 style={{ width: "20rem" }}
